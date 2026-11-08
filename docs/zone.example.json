@@ -1,0 +1,10 @@
+{
+  "domain": "example.com",
+  "email_type": "MX",
+  "hosts": [
+    {"name": "@", "type": "A", "address": "203.0.113.10", "ttl": 1800},
+    {"name": "www", "type": "CNAME", "address": "example.com.", "ttl": 1800},
+    {"name": "@", "type": "MX", "address": "mx.example.net.", "ttl": 1800, "mxpref": 10},
+    {"name": "@", "type": "TXT", "address": "site-verification=example", "ttl": 1800}
+  ]
+}

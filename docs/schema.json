@@ -1,0 +1,1388 @@
+{
+  "schema_version": 1,
+  "ok": true,
+  "command": "schema",
+  "data": {
+    "cli_version": "0.1.0",
+    "output_schema_version": 1,
+    "commands": [
+      {
+        "command": "config init",
+        "description": "create a configuration with allowed domains",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "flags": [
+              "--domain"
+            ],
+            "required": false,
+            "help": "allow a domain (repeatable)",
+            "nargs": null,
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "command": "config allow",
+        "description": "allow one or more domains you are authorized to manage",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domains",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": "+",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "command": "config show",
+        "description": "show non-secret configuration",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          }
+        ]
+      },
+      {
+        "command": "auth setup",
+        "description": "store credentials locally; agents can use environment variables instead",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "username",
+            "flags": [
+              "--username"
+            ],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "force",
+            "flags": [
+              "--force"
+            ],
+            "required": false,
+            "help": "",
+            "nargs": 0,
+            "type": "boolean"
+          }
+        ]
+      },
+      {
+        "command": "doctor",
+        "description": "check configuration, IPv4, and read-only API access",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          }
+        ]
+      },
+      {
+        "command": "schema",
+        "description": "describe commands, JSON output, and zone-file schemas",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          }
+        ]
+      },
+      {
+        "command": "domains list",
+        "description": "list allowed domains in the account",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "all",
+            "flags": [
+              "--all"
+            ],
+            "required": false,
+            "help": "explicitly include domains outside the allowlist",
+            "nargs": 0,
+            "type": "boolean"
+          }
+        ]
+      },
+      {
+        "command": "domains check",
+        "description": "check registration availability; never registers a domain",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "names",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": "+",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "command": "dns list",
+        "description": "return the zone and its state hash",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "command": "dns add",
+        "description": "add a record (identical existing records are a no-op)",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "host",
+            "flags": [],
+            "required": true,
+            "help": "@, a relative name, or a name within the domain",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string",
+            "choices": [
+              "A",
+              "AAAA",
+              "ALIAS",
+              "CNAME",
+              "MX",
+              "MXE",
+              "NS",
+              "TXT",
+              "URL",
+              "URL301",
+              "FRAME"
+            ]
+          },
+          {
+            "name": "value",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "ttl",
+            "flags": [
+              "--ttl"
+            ],
+            "required": false,
+            "help": "",
+            "nargs": null,
+            "type": "integer"
+          },
+          {
+            "name": "mxpref",
+            "flags": [
+              "--mxpref"
+            ],
+            "required": false,
+            "help": "",
+            "nargs": null,
+            "type": "integer"
+          },
+          {
+            "name": "yes",
+            "flags": [
+              "--yes"
+            ],
+            "required": false,
+            "help": "apply after reviewing the dry run",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "if_match",
+            "flags": [
+              "--if-match"
+            ],
+            "required": false,
+            "help": "state_hash returned by the preview; required with --yes",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "email_type",
+            "flags": [
+              "--email-type"
+            ],
+            "required": false,
+            "help": "explicit email-mode change; omitted means preserve",
+            "nargs": null,
+            "type": "string",
+            "choices": [
+              "MX",
+              "MXE",
+              "FWD",
+              "OX"
+            ]
+          }
+        ]
+      },
+      {
+        "command": "dns set",
+        "description": "replace records of this type at the host and any conflicting records",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "host",
+            "flags": [],
+            "required": true,
+            "help": "@, a relative name, or a name within the domain",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string",
+            "choices": [
+              "A",
+              "AAAA",
+              "ALIAS",
+              "CNAME",
+              "MX",
+              "MXE",
+              "NS",
+              "TXT",
+              "URL",
+              "URL301",
+              "FRAME"
+            ]
+          },
+          {
+            "name": "value",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "ttl",
+            "flags": [
+              "--ttl"
+            ],
+            "required": false,
+            "help": "",
+            "nargs": null,
+            "type": "integer"
+          },
+          {
+            "name": "mxpref",
+            "flags": [
+              "--mxpref"
+            ],
+            "required": false,
+            "help": "",
+            "nargs": null,
+            "type": "integer"
+          },
+          {
+            "name": "yes",
+            "flags": [
+              "--yes"
+            ],
+            "required": false,
+            "help": "apply after reviewing the dry run",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "if_match",
+            "flags": [
+              "--if-match"
+            ],
+            "required": false,
+            "help": "state_hash returned by the preview; required with --yes",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "email_type",
+            "flags": [
+              "--email-type"
+            ],
+            "required": false,
+            "help": "explicit email-mode change; omitted means preserve",
+            "nargs": null,
+            "type": "string",
+            "choices": [
+              "MX",
+              "MXE",
+              "FWD",
+              "OX"
+            ]
+          }
+        ]
+      },
+      {
+        "command": "dns remove",
+        "description": "remove matching records (absent records are a no-op)",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "host",
+            "flags": [],
+            "required": true,
+            "help": "@, a relative name, or a name within the domain",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string",
+            "choices": [
+              "A",
+              "AAAA",
+              "ALIAS",
+              "CNAME",
+              "MX",
+              "MXE",
+              "NS",
+              "TXT",
+              "URL",
+              "URL301",
+              "FRAME"
+            ]
+          },
+          {
+            "name": "value",
+            "flags": [
+              "--value"
+            ],
+            "required": false,
+            "help": "match one value; omitted removes all of this type at the host",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "yes",
+            "flags": [
+              "--yes"
+            ],
+            "required": false,
+            "help": "apply after reviewing the dry run",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "if_match",
+            "flags": [
+              "--if-match"
+            ],
+            "required": false,
+            "help": "state_hash returned by the preview; required with --yes",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "email_type",
+            "flags": [
+              "--email-type"
+            ],
+            "required": false,
+            "help": "explicit email-mode change; omitted means preserve",
+            "nargs": null,
+            "type": "string",
+            "choices": [
+              "MX",
+              "MXE",
+              "FWD",
+              "OX"
+            ]
+          }
+        ]
+      },
+      {
+        "command": "dns apply",
+        "description": "replace the whole zone from a zone JSON file",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "file",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "yes",
+            "flags": [
+              "--yes"
+            ],
+            "required": false,
+            "help": "apply after reviewing the dry run",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "if_match",
+            "flags": [
+              "--if-match"
+            ],
+            "required": false,
+            "help": "state_hash returned by the preview; required with --yes",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "email_type",
+            "flags": [
+              "--email-type"
+            ],
+            "required": false,
+            "help": "explicit email-mode change; omitted means preserve",
+            "nargs": null,
+            "type": "string",
+            "choices": [
+              "MX",
+              "MXE",
+              "FWD",
+              "OX"
+            ]
+          }
+        ]
+      },
+      {
+        "command": "ns list",
+        "description": "return nameservers and their state hash",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "command": "ns set",
+        "description": "change nameservers; create target DNS records before applying",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "custom",
+            "flags": [
+              "--custom"
+            ],
+            "required": false,
+            "help": "",
+            "nargs": "+",
+            "type": "string"
+          },
+          {
+            "name": "default",
+            "flags": [
+              "--default"
+            ],
+            "required": false,
+            "help": "",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "yes",
+            "flags": [
+              "--yes"
+            ],
+            "required": false,
+            "help": "apply after reviewing the dry run",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "if_match",
+            "flags": [
+              "--if-match"
+            ],
+            "required": false,
+            "help": "state_hash returned by the preview; required with --yes",
+            "nargs": null,
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "command": "restore",
+        "description": "preview or apply restoration of a saved DNS/nameserver backup",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "file",
+            "flags": [],
+            "required": true,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "yes",
+            "flags": [
+              "--yes"
+            ],
+            "required": false,
+            "help": "apply after reviewing the dry run",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "if_match",
+            "flags": [
+              "--if-match"
+            ],
+            "required": false,
+            "help": "state_hash returned by the preview; required with --yes",
+            "nargs": null,
+            "type": "string"
+          }
+        ]
+      }
+    ],
+    "output_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Namecheap CLI result",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "ok",
+        "command"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "command": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "error": {
+          "type": "object",
+          "required": [
+            "code",
+            "message",
+            "details",
+            "retryable"
+          ],
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "details": {
+              "type": "object"
+            },
+            "retryable": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "ok": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "data",
+              "warnings"
+            ]
+          },
+          "else": {
+            "required": [
+              "error"
+            ]
+          }
+        }
+      ]
+    },
+    "zone_file_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Namecheap zone",
+      "type": "object",
+      "required": [
+        "domain",
+        "hosts"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "type": "string"
+        },
+        "email_type": {
+          "enum": [
+            "MX",
+            "MXE",
+            "FWD",
+            "OX",
+            null
+          ]
+        },
+        "hosts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "type",
+              "address"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "A",
+                  "AAAA",
+                  "ALIAS",
+                  "CNAME",
+                  "MX",
+                  "MXE",
+                  "NS",
+                  "TXT",
+                  "URL",
+                  "URL301",
+                  "FRAME"
+                ]
+              },
+              "address": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ttl": {
+                "type": "integer",
+                "minimum": 60,
+                "maximum": 60000
+              },
+              "mxpref": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              }
+            }
+          }
+        }
+      }
+    },
+    "exit_codes": {
+      "0": "success",
+      "1": "provider/network failure",
+      "2": "invalid input",
+      "3": "blocked or conflict",
+      "4": "write unverified",
+      "66": "missing credentials",
+      "130": "interrupted"
+    }
+  },
+  "warnings": []
+}

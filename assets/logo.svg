@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title">
+  <title id="title">Namecheap CLI project mark: a terminal prompt connected to DNS nodes</title>
+  <rect width="160" height="160" rx="32" fill="#102c2d"/>
+  <path d="m33 61 20 19-20 19" fill="none" stroke="#c3f36b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M66 80h22m0 0V48h22M88 80v32h22" fill="none" stroke="#dce7e1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="120" cy="48" r="11" fill="#c3f36b"/>
+  <circle cx="120" cy="112" r="11" fill="#c3f36b"/>
+</svg>
