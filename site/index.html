@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Namecheap CLI — DNS automation for AI agents and scripts</title>
+  <meta name="description" content="An open-source Namecheap DNS CLI for AI agents and scripts. Manage DNS records and nameservers with JSON output, dry runs, guarded writes, backups, and recovery.">
+  <link rel="canonical" href="https://r-varun.github.io/namecheap-cli/">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Namecheap CLI — DNS for agents and scripts">
+  <meta property="og:description" content="Manage Namecheap DNS from your terminal or an AI agent. Preview the change, apply it, and check the result.">
+  <meta property="og:url" content="https://r-varun.github.io/namecheap-cli/">
+  <meta property="og:image" content="https://r-varun.github.io/namecheap-cli/assets/social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#102c2d">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Namecheap CLI","description":"Open-source Namecheap DNS automation for AI agents and scripts, with JSON output, previews, guarded writes, and recovery.","codeRepository":"https://github.com/R-Varun/namecheap-cli","programmingLanguage":"Python","license":"https://github.com/R-Varun/namecheap-cli/blob/main/LICENSE","url":"https://r-varun.github.io/namecheap-cli/","version":"0.1.0"}
+  </script>
+  <style>
+    :root{--ink:#102c2d;--muted:#536763;--paper:#f5f7f1;--line:#dce3d9;--lime:#c3f36b;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.6}a{color:inherit;text-underline-offset:4px}a:focus-visible,button:focus-visible{outline:3px solid #508e11;outline-offset:5px}.wrap{max-width:1120px;margin:auto;padding:0 32px}header{display:flex;align-items:center;justify-content:space-between;padding:28px 0;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:12px;font-weight:700;text-decoration:none;letter-spacing:-.5px}.brand img{width:38px;height:38px}nav{display:flex;gap:26px;font-size:14px}nav a{text-decoration:none}.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:64px;align-items:center;padding:85px 0 76px}.label{font-family:var(--mono);font-size:12px;letter-spacing:1.1px;text-transform:uppercase;display:flex;align-items:center;gap:10px}.dot{width:7px;height:7px;background:#5c8e28;border-radius:50%}h1{font-size:clamp(40px,5vw,62px);letter-spacing:-2.8px;line-height:1.08;margin:24px 0}h1 span{color:#57734c}.intro{color:var(--muted);max-width:450px;font-size:18px}.buttons{display:flex;gap:12px;margin-top:30px}.button{display:inline-flex;align-items:center;padding:12px 20px;border-radius:7px;text-decoration:none;font-size:14px;font-weight:700;border:1px solid var(--ink)}.primary{background:var(--ink);color:var(--paper)}.terminal{background:var(--ink);color:#dce7e1;border-radius:14px;box-shadow:0 16px 45px #102c2d12;overflow:hidden}.terminal-title{border-bottom:1px solid #355050;padding:16px 23px;font:11px var(--mono);letter-spacing:1.4px;color:#b2c7bc}.terminal-body{padding:26px;font:13px/1.9 var(--mono);overflow:auto}.terminal-body pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.comment{color:#90aca0}.green{color:var(--lime)}.terminal-foot{padding:15px 24px;border-top:1px solid #355050;font-size:12px;color:#c6d7cd}.install{background:#e8eee2;border:1px solid #d6dfcf;border-radius:10px;padding:22px 26px;display:flex;gap:20px;align-items:center;justify-content:space-between}.install-label{font-size:11px;letter-spacing:1.4px;font-weight:700;white-space:nowrap}.install code{font:12px var(--mono);overflow-wrap:anywhere}.copy{border:1px solid #b4c3a9;border-radius:5px;background:transparent;padding:7px 11px;cursor:pointer;color:var(--ink);font-size:12px}.section{padding:70px 0;border-bottom:1px solid var(--line)}h2{font-size:32px;letter-spacing:-1.1px;line-height:1.2;margin:12px 0 30px}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}.number{font:12px var(--mono);color:#647d58}h3{font-size:18px;line-height:1.3;margin:15px 0 10px}.features p,.scope p{color:var(--muted);font-size:15px;margin:0}.scope{display:grid;grid-template-columns:1fr 1fr;gap:70px}.scope ul{padding-left:18px;color:var(--muted);font-size:15px}.scope li{margin:6px 0}.note{padding:18px 22px;border-left:3px solid #90af6e;background:#edf1e7;font-size:14px;color:#425a4e;margin-top:30px}.links{display:flex;gap:24px;font-size:14px;flex-wrap:wrap}footer{padding:30px 0 40px;display:flex;justify-content:space-between;gap:24px;color:var(--muted);font-size:12px}code{font-family:var(--mono)}@media(max-width:800px){.hero{grid-template-columns:1fr;gap:36px;padding:50px 0}.features{grid-template-columns:1fr;gap:25px}.scope{grid-template-columns:1fr;gap:24px}.install{align-items:flex-start;flex-wrap:wrap}.install code{flex-basis:100%;order:3}.section{padding:45px 0}h1{letter-spacing:-1.8px}.wrap{padding:0 22px}nav{gap:15px}footer{flex-direction:column;gap:8px}.terminal-body{padding:22px}}@media(prefers-reduced-motion:no-preference){.button,.copy{transition:background-color .15s}.primary:hover{background:#254747}.copy:hover{background:#d9e3d0}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="./"><img src="assets/logo.svg" alt="" width="38" height="38">Namecheap CLI</a>
+    <nav aria-label="Main"><a href="https://github.com/R-Varun/namecheap-cli#readme">Docs</a><a href="https://github.com/R-Varun/namecheap-cli">GitHub ↗</a></nav>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <div class="label"><span class="dot"></span>Open source · Python · MIT</div>
+        <h1 id="hero-title">Namecheap DNS.<br><span>Ready for your agent.</span></h1>
+        <p class="intro">Manage DNS records and nameservers from the terminal. Get JSON back. Preview the change, apply it, and check the result.</p>
+        <div class="buttons"><a class="button primary" href="https://github.com/R-Varun/namecheap-cli#install">Get started ↗</a><a class="button" href="https://github.com/R-Varun/namecheap-cli/blob/main/docs/agents.md">Agent guide</a></div>
+      </div>
+      <div class="terminal" aria-label="Example DNS preview">
+        <div class="terminal-title">PREVIEW A DNS CHANGE</div>
+        <div class="terminal-body"><pre><span class="comment"># No write happens yet.</span>
+<span class="green">$</span> namecheap dns set example.com @ A 203.0.113.10
+
+<span class="comment">Selected result fields:</span>
+{
+  "dry_run": <span class="green">true</span>,
+  "changed": true,
+  "state_hash": "…",
+  "verified": false
+}</pre></div>
+        <div class="terminal-foot">A write needs <code>--yes</code> and the preview's state hash.</div>
+      </div>
+    </section>
+    <div class="install" id="install"><span class="install-label">INSTALL WITH UV</span><code id="install-command">uv tool install --python 3.12 'git+https://github.com/R-Varun/namecheap-cli@v0.1.0'</code><button class="copy" type="button" id="copy">Copy</button><span id="copy-status" role="status" hidden></span></div>
+    <section class="section" aria-labelledby="purpose-title">
+      <div class="label">A small tool for a real task</div>
+      <h2 id="purpose-title">Let the agent use a CLI.<br>Keep the change easy to inspect.</h2>
+      <div class="features">
+        <article><span class="number">01 / INSPECT</span><h3>One JSON result.</h3><p>Records, diffs, errors, and exit codes have a clear format. Run <code>namecheap schema</code> to discover the commands.</p></article>
+        <article><span class="number">02 / APPLY</span><h3>Preview before a write.</h3><p>Review the diff, then confirm with the observed state hash. Local locks keep CLI writers from overwriting each other.</p></article>
+        <article><span class="number">03 / RECOVER</span><h3>A backup before submission.</h3><p>If a request cannot be verified, the result points to the saved state and recovery journal. No automatic write retries.</p></article>
+      </div>
+    </section>
+    <section class="section scope" aria-labelledby="scope-title">
+      <div><div class="label">What it covers</div><h2 id="scope-title">DNS automation.<br>A clear, bounded scope.</h2><p>For AI agents, deployment scripts, and people who want to manage Namecheap DNS without maintaining their own API wrapper.</p></div>
+      <div><ul><li>BasicDNS records, including A, AAAA, CNAME, MX, and TXT</li><li>Nameserver delegation and domain availability checks</li><li>Domain allowlists and separate sandbox credentials</li><li>Zero runtime dependencies; Python 3.11+</li></ul><div class="note"><strong>First public beta.</strong> Tested offline with a local API and concurrent processes. Authenticated provider writes remain unverified. Unsupported DNS settings block writes. No domain purchases or transfers.</div></div>
+    </section>
+    <section class="section"><div class="links"><a href="https://github.com/R-Varun/namecheap-cli#readme">Read the README ↗</a><a href="https://github.com/R-Varun/namecheap-cli/blob/main/docs/safety.md">How writes work ↗</a><a href="https://github.com/R-Varun/namecheap-cli/releases">Releases ↗</a></div></section>
+  </main>
+  <footer><span>Built by <a href="https://github.com/R-Varun">R-Varun</a> · MIT license</span><span>Unofficial. Not affiliated with Namecheap.</span></footer>
+</div>
+<script>
+document.getElementById('copy').addEventListener('click', async function () {
+  try {
+    await navigator.clipboard.writeText(document.getElementById('install-command').textContent);
+    this.textContent = 'Copied';
+    const status = document.getElementById('copy-status');
+    status.hidden = false; status.textContent = 'Install command copied.';
+  } catch { this.textContent = 'Select text'; }
+});
+</script>
+</body>
+</html>

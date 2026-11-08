@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling>=1.26,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "namecheap-agent-cli"
+version = "0.1.0"
+description = "Namecheap DNS CLI for AI agents and scripts: JSON output, dry runs, guarded writes, and recovery."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "R-Varun"}]
+keywords = ["namecheap", "dns", "cli", "ai-agents", "dns-automation", "nameservers"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Internet :: Name Service (DNS)",
+  "Topic :: System :: Systems Administration",
+]
+
+[project.urls]
+Homepage = "https://github.com/R-Varun/namecheap-cli"
+Documentation = "https://github.com/R-Varun/namecheap-cli#readme"
+Repository = "https://github.com/R-Varun/namecheap-cli"
+Issues = "https://github.com/R-Varun/namecheap-cli/issues"
+
+[project.scripts]
+namecheap = "namecheap_cli.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3,<10", "pytest-cov>=6,<8", "hypothesis>=6.120,<7", "ruff>=0.14,<1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/namecheap_cli"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "docs", "assets", "README.md", "LICENSE", "AGENTS.md", "CLAUDE.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "pyproject.toml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.coverage.run]
+branch = true
+source = ["namecheap_cli"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 85
