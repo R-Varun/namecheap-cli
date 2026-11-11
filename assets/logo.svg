@@ -1,8 +1,47 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title">
-  <title id="title">Namecheap CLI project mark: a terminal prompt connected to DNS nodes</title>
-  <rect width="160" height="160" rx="32" fill="#102c2d"/>
-  <path d="m33 61 20 19-20 19" fill="none" stroke="#c3f36b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M66 80h22m0 0V48h22M88 80v32h22" fill="none" stroke="#dce7e1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="120" cy="48" r="11" fill="#c3f36b"/>
-  <circle cx="120" cy="112" r="11" fill="#c3f36b"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="114 102 800 800" role="img" aria-labelledby="title desc">
+  <title id="title">namecheap-cli</title>
+  <desc id="desc">Interlocking titanium keystones around an open diamond with a precise ice-blue alignment seam.</desc>
+  <defs>
+    <linearGradient id="silver" x1="355" y1="181" x2="610" y2="663" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DBDDDE"/>
+      <stop offset=".43" stop-color="#BFC2C4"/>
+      <stop offset="1" stop-color="#91979C"/>
+    </linearGradient>
+    <linearGradient id="silver-edge" x1="340" y1="180" x2="610" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0F4F5"/>
+      <stop offset=".48" stop-color="#8B9399"/>
+      <stop offset="1" stop-color="#434B51"/>
+    </linearGradient>
+    <linearGradient id="gunmetal" x1="590" y1="335" x2="460" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#424C55"/>
+      <stop offset=".46" stop-color="#30373E"/>
+      <stop offset="1" stop-color="#252B30"/>
+    </linearGradient>
+    <linearGradient id="dark-edge" x1="680" y1="326" x2="430" y2="831" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#73818A"/>
+      <stop offset=".3" stop-color="#31383F"/>
+      <stop offset="1" stop-color="#161B20"/>
+    </linearGradient>
+  </defs>
+  <path fill="#080A0D" d="M114 102h800v800H114z"/>
+  <!-- Pale upper-left keystone: shallow machined bevel and planar face. -->
+  <path fill="url(#silver-edge)" d="M229 357 393 173H630L723 275 571 438 511 377 397 501 454 565 351 674H267L229 632Z"/>
+  <path fill="url(#silver)" d="M239 359 399 181H626L712 275 570 422 512 361 380 501 439 563 348 664H270L239 628Z"/>
+  <path fill="#F0F3F4" opacity=".7" d="m393 173 6 8h227l4-8Zm-164 184 10 2 160-178-6-8Z"/>
+  <path fill="#5B6268" d="m570 422 1 16 152-163-11 0Z"/>
+  <path fill="#676E74" d="m380 501 17 0 114-124 1-16Z"/>
+  <path fill="#D7DDDF" opacity=".7" d="m239 359-10-2v275l10-4Z"/>
+  <path fill="#575F65" d="m270 664-3 10h84l-3-10Z"/>
+  <!-- Dark lower-right keystone preserves the same diamond aperture. -->
+  <path fill="url(#dark-edge)" d="M680 326H762L800 369V644L629 831H397L306 729 456 568 512 630 628 502 571 445Z"/>
+  <path fill="url(#gunmetal)" d="M684 335H759L790 371V639L627 820H400L317 727 460 575 511 644 644 502 587 444Z"/>
+  <path fill="#BAC7CD" opacity=".8" d="m680 326 4 9h75l3-9Z"/>
+  <path fill="#6F7A81" opacity=".45" d="m790 371 10-2v275l-10-5Z"/>
+  <path fill="#667078" opacity=".35" d="m627 820 2 11H397l3-11Z"/>
+  <path fill="#576269" d="m511 644 1-14 116-128h16Z"/>
+  <path fill="#A9B7BF" opacity=".7" d="m397 831 3-11-83-93-11 2Z"/>
+  <!-- Two collinear signal seams; no blur so the vector stays crisp. -->
+  <path d="m576 439 105-104m-364 390 137-149" fill="none" stroke="#377382" stroke-width="8"/>
+  <path d="m576 439 105-104m-364 390 137-149" fill="none" stroke="#8ADAE6" stroke-width="3.5"/>
+  <path d="m576 439 105-104m-364 390 137-149" fill="none" stroke="#E0FAFF" stroke-width="1.25"/>
 </svg>

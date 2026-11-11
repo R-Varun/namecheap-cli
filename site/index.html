@@ -3,81 +3,584 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Namecheap CLI — DNS automation for AI agents and scripts</title>
-  <meta name="description" content="An open-source Namecheap DNS CLI for AI agents and scripts. Manage DNS records and nameservers with JSON output, dry runs, guarded writes, backups, and recovery.">
+  <title>Namecheap CLI — Guarded DNS automation for AI agents and scripts</title>
+  <meta name="description" content="Zero-dependency Namecheap DNS CLI for AI agents and scripts. Structured JSON output, dry-run previews, optimistic state-hash locks, automatic backups, and live DNS propagation checks.">
   <link rel="canonical" href="https://r-varun.github.io/namecheap-cli/">
+  <link rel="icon" href="favicon.ico" sizes="32x32">
   <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Namecheap CLI — DNS for agents and scripts">
-  <meta property="og:description" content="Manage Namecheap DNS from your terminal or an AI agent. Preview the change, apply it, and check the result.">
+  <meta property="og:site_name" content="Namecheap CLI">
+  <meta property="og:title" content="Namecheap CLI — Guarded DNS automation for AI agents and scripts">
+  <meta property="og:description" content="Inspect zones, preview diffs, apply state-hash guarded writes with automatic backups, and verify live public DNS propagation.">
   <meta property="og:url" content="https://r-varun.github.io/namecheap-cli/">
   <meta property="og:image" content="https://r-varun.github.io/namecheap-cli/assets/social.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:image:alt" content="Titanium interlocking keystone with an ice-blue alignment seam beside the namecheap-cli wordmark on black.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="theme-color" content="#102c2d">
+  <meta name="twitter:title" content="Namecheap CLI — Guarded DNS automation for AI agents and scripts">
+  <meta name="twitter:description" content="Zero-dependency Namecheap DNS CLI with JSON envelopes, dry runs, optimistic state-hash locks, backups, and live DoH verification.">
+  <meta name="twitter:image" content="https://r-varun.github.io/namecheap-cli/assets/social.png">
+  <meta name="twitter:image:alt" content="Titanium interlocking keystone with an ice-blue alignment seam beside the namecheap-cli wordmark on black.">
+  <meta name="theme-color" content="#080A0D">
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Namecheap CLI","description":"Open-source Namecheap DNS automation for AI agents and scripts, with JSON output, previews, guarded writes, and recovery.","codeRepository":"https://github.com/R-Varun/namecheap-cli","programmingLanguage":"Python","license":"https://github.com/R-Varun/namecheap-cli/blob/main/LICENSE","url":"https://r-varun.github.io/namecheap-cli/","version":"0.1.0"}
+  {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Namecheap CLI","description":"Zero-dependency Namecheap DNS automation CLI for AI agents and scripts, with versioned JSON envelopes, dry-run previews, state-hash guarded writes, automatic backups, and live DNS propagation verification.","codeRepository":"https://github.com/R-Varun/namecheap-cli","programmingLanguage":"Python","runtimePlatform":"Python 3.11+","license":"https://github.com/R-Varun/namecheap-cli/blob/main/LICENSE","url":"https://r-varun.github.io/namecheap-cli/","version":"__CLI_VERSION__"}
   </script>
   <style>
-    :root{--ink:#102c2d;--muted:#536763;--paper:#f5f7f1;--line:#dce3d9;--lime:#c3f36b;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.6}a{color:inherit;text-underline-offset:4px}a:focus-visible,button:focus-visible{outline:3px solid #508e11;outline-offset:5px}.wrap{max-width:1120px;margin:auto;padding:0 32px}header{display:flex;align-items:center;justify-content:space-between;padding:28px 0;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:12px;font-weight:700;text-decoration:none;letter-spacing:-.5px}.brand img{width:38px;height:38px}nav{display:flex;gap:26px;font-size:14px}nav a{text-decoration:none}.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:64px;align-items:center;padding:85px 0 76px}.label{font-family:var(--mono);font-size:12px;letter-spacing:1.1px;text-transform:uppercase;display:flex;align-items:center;gap:10px}.dot{width:7px;height:7px;background:#5c8e28;border-radius:50%}h1{font-size:clamp(40px,5vw,62px);letter-spacing:-2.8px;line-height:1.08;margin:24px 0}h1 span{color:#57734c}.intro{color:var(--muted);max-width:450px;font-size:18px}.buttons{display:flex;gap:12px;margin-top:30px}.button{display:inline-flex;align-items:center;padding:12px 20px;border-radius:7px;text-decoration:none;font-size:14px;font-weight:700;border:1px solid var(--ink)}.primary{background:var(--ink);color:var(--paper)}.terminal{background:var(--ink);color:#dce7e1;border-radius:14px;box-shadow:0 16px 45px #102c2d12;overflow:hidden}.terminal-title{border-bottom:1px solid #355050;padding:16px 23px;font:11px var(--mono);letter-spacing:1.4px;color:#b2c7bc}.terminal-body{padding:26px;font:13px/1.9 var(--mono);overflow:auto}.terminal-body pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.comment{color:#90aca0}.green{color:var(--lime)}.terminal-foot{padding:15px 24px;border-top:1px solid #355050;font-size:12px;color:#c6d7cd}.install{background:#e8eee2;border:1px solid #d6dfcf;border-radius:10px;padding:22px 26px;display:flex;gap:20px;align-items:center;justify-content:space-between}.install-label{font-size:11px;letter-spacing:1.4px;font-weight:700;white-space:nowrap}.install code{font:12px var(--mono);overflow-wrap:anywhere}.copy{border:1px solid #b4c3a9;border-radius:5px;background:transparent;padding:7px 11px;cursor:pointer;color:var(--ink);font-size:12px}.section{padding:70px 0;border-bottom:1px solid var(--line)}h2{font-size:32px;letter-spacing:-1.1px;line-height:1.2;margin:12px 0 30px}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}.number{font:12px var(--mono);color:#647d58}h3{font-size:18px;line-height:1.3;margin:15px 0 10px}.features p,.scope p{color:var(--muted);font-size:15px;margin:0}.scope{display:grid;grid-template-columns:1fr 1fr;gap:70px}.scope ul{padding-left:18px;color:var(--muted);font-size:15px}.scope li{margin:6px 0}.note{padding:18px 22px;border-left:3px solid #90af6e;background:#edf1e7;font-size:14px;color:#425a4e;margin-top:30px}.links{display:flex;gap:24px;font-size:14px;flex-wrap:wrap}footer{padding:30px 0 40px;display:flex;justify-content:space-between;gap:24px;color:var(--muted);font-size:12px}code{font-family:var(--mono)}@media(max-width:800px){.hero{grid-template-columns:1fr;gap:36px;padding:50px 0}.features{grid-template-columns:1fr;gap:25px}.scope{grid-template-columns:1fr;gap:24px}.install{align-items:flex-start;flex-wrap:wrap}.install code{flex-basis:100%;order:3}.section{padding:45px 0}h1{letter-spacing:-1.8px}.wrap{padding:0 22px}nav{gap:15px}footer{flex-direction:column;gap:8px}.terminal-body{padding:22px}}@media(prefers-reduced-motion:no-preference){.button,.copy{transition:background-color .15s}.primary:hover{background:#254747}.copy:hover{background:#d9e3d0}}
+    :root {
+      --bg: #080A0D;
+      --bg-elev: #101318;
+      --bg-card: #13171C;
+      --bg-code: #06080B;
+      --line: #262C33;
+      --line-strong: #3B444E;
+      --ink: #EDF2F5;
+      --muted: #98A4AE;
+      --accent: #8ADAE6;
+      --accent-soft: rgba(138, 218, 230, 0.12);
+      --signal: #B4C6CF;
+      --signal-soft: rgba(180, 198, 207, 0.10);
+      --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); color-scheme: dark; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(900px 460px at 15% -5%, rgba(138, 218, 230, 0.05), transparent 60%),
+        radial-gradient(820px 440px at 88% 4%, rgba(180, 198, 207, 0.035), transparent 60%),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-underline-offset: 4px; }
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--signal);
+      outline-offset: 3px;
+    }
+    .skip {
+      position: absolute;
+      left: -9999px;
+      top: 12px;
+      background: var(--signal);
+      color: #080A0D;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      z-index: 50;
+    }
+    .skip:focus { left: 16px; }
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 28px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--line);
+      gap: 16px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 17px;
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .brand img { width: 36px; height: 36px; border-radius: 9px; }
+    .ver-pill {
+      font: 600 11px/1 var(--mono);
+      color: var(--signal);
+      background: var(--signal-soft);
+      border: 1px solid rgba(180, 198, 207, 0.24);
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+    nav { display: flex; align-items: center; gap: 22px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+    nav a { text-decoration: none; }
+    nav a:hover { color: var(--ink); }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.02fr 1.08fr;
+      gap: 52px;
+      align-items: center;
+      padding: 74px 0 60px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font: 600 12px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--signal);
+      box-shadow: 0 0 12px var(--signal);
+    }
+    h1 {
+      font-size: clamp(38px, 4.8vw, 60px);
+      letter-spacing: -0.04em;
+      line-height: 1.06;
+      margin: 20px 0;
+    }
+    h1 span {
+      background: linear-gradient(92deg, #E0F3F6 0%, #8ADAE6 45%, #B4C6CF 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .intro {
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 500px;
+      margin: 0;
+    }
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+    .pill {
+      font: 500 12px/1.2 var(--mono);
+      color: #CED7DD;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+    .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid var(--line-strong);
+      background: var(--bg-elev);
+      color: var(--ink);
+    }
+    .button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #080A0D;
+      font-weight: 700;
+    }
+    .terminal {
+      background: var(--bg-code);
+      border: 1px solid var(--line-strong);
+      border-radius: 14px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+    .terminal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 18px;
+      background: #101318;
+      border-bottom: 1px solid var(--line);
+      font: 600 11px/1 var(--mono);
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .lights { display: inline-flex; gap: 6px; }
+    .lights i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: #323A43; }
+    .lights i:first-child { background: #8ADAE6; }
+    .lights i:last-child { background: #B4C6CF; }
+    .terminal-body {
+      padding: 22px;
+      font: 12.5px/1.72 var(--mono);
+      color: #DCE3E8;
+      overflow-x: auto;
+    }
+    .terminal-body pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .c-dim { color: #8F9DA8; }
+    .c-prompt { color: var(--accent); font-weight: 700; }
+    .c-ok { color: var(--signal); }
+    .c-key { color: #9BCCD6; }
+    .terminal-foot {
+      padding: 13px 18px;
+      border-top: 1px solid var(--line);
+      background: #0D1014;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    .terminal-foot code { color: var(--ink); }
+    .install-card {
+      background: var(--bg-card);
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 16px;
+    }
+    .install-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .install-tabs { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+    .tab {
+      font: 600 12px/1 var(--mono);
+      padding: 7px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: var(--bg-code);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .tab[aria-selected="true"] {
+      color: var(--ink);
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .install-hint { font-size: 12.5px; color: var(--muted); }
+    .install-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--bg-code);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .install-row code {
+      font: 13px/1.5 var(--mono);
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+    .copy {
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: var(--bg-elev);
+      padding: 8px 14px;
+      cursor: pointer;
+      color: var(--ink);
+      font: 600 12px/1 var(--sans);
+      white-space: nowrap;
+    }
+    .section { padding: 68px 0; border-top: 1px solid var(--line); }
+    h2 {
+      font-size: clamp(26px, 3.2vw, 36px);
+      letter-spacing: -0.03em;
+      line-height: 1.18;
+      margin: 12px 0 28px;
+    }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .step-num { font: 700 12px/1 var(--mono); color: var(--accent); letter-spacing: 0.06em; }
+    h3 { font-size: 18px; line-height: 1.3; margin: 12px 0 10px; letter-spacing: -0.01em; }
+    .card p, .split p { color: var(--muted); font-size: 15px; margin: 0; }
+    .split { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: start; }
+    .check-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+    .check-list li {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 14.5px;
+      color: #D4DCE2;
+    }
+    .check-list strong { color: var(--signal); font-family: var(--mono); font-size: 13px; margin-right: 6px; }
+    .compare {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .compare th, .compare td {
+      text-align: left;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .compare th {
+      font: 600 12px/1.3 var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      background: #10151A;
+    }
+    .compare tr:last-child td { border-bottom: 0; }
+    .compare td:nth-child(2) { color: var(--ink); font-weight: 500; }
+    .compare td:nth-child(3), .compare td:nth-child(4) { color: var(--muted); }
+    .links { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
+    .links a {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      text-decoration: none;
+    }
+    .links a:hover { border-color: var(--line-strong); }
+    footer {
+      padding: 30px 0 44px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+    code { font-family: var(--mono); font-size: 0.92em; }
+    @media (max-width: 880px) {
+      .hero, .grid-3, .split { grid-template-columns: 1fr; gap: 28px; }
+      .hero { padding: 48px 0 36px; }
+      .section { padding: 48px 0; }
+      .wrap { padding: 0 20px; }
+      .install-row { flex-direction: column; align-items: stretch; }
+      .copy { align-self: flex-start; }
+      .compare-wrap { overflow-x: auto; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .button, .copy, .tab, .links a { transition: border-color 0.15s, background-color 0.15s, transform 0.15s; }
+      .button.primary:hover { background: #A9EAF2; border-color: #A9EAF2; }
+      .button:not(.primary):hover, .copy:hover { border-color: var(--ink); }
+    }
   </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="wrap">
   <header>
-    <a class="brand" href="./"><img src="assets/logo.svg" alt="" width="38" height="38">Namecheap CLI</a>
-    <nav aria-label="Main"><a href="https://github.com/R-Varun/namecheap-cli#readme">Docs</a><a href="https://github.com/R-Varun/namecheap-cli">GitHub ↗</a></nav>
+    <a class="brand" href="./">
+      <img src="assets/logo.svg" alt="" width="36" height="36">
+      <span>Namecheap CLI</span>
+      <span class="ver-pill">v__CLI_VERSION__</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="#install">Install</a>
+      <a href="#safety">Write Safety</a>
+      <a href="schema.json">Schema JSON</a>
+      <a href="llms.txt">llms.txt</a>
+      <a href="https://github.com/R-Varun/namecheap-cli">GitHub ↗</a>
+    </nav>
   </header>
-  <main>
+
+  <main id="main">
     <section class="hero" aria-labelledby="hero-title">
       <div>
-        <div class="label"><span class="dot"></span>Open source · Python · MIT</div>
-        <h1 id="hero-title">Namecheap DNS.<br><span>Ready for your agent.</span></h1>
-        <p class="intro">Manage DNS records and nameservers from the terminal. Get JSON back. Preview the change, apply it, and check the result.</p>
-        <div class="buttons"><a class="button primary" href="https://github.com/R-Varun/namecheap-cli#install">Get started ↗</a><a class="button" href="https://github.com/R-Varun/namecheap-cli/blob/main/docs/agents.md">Agent guide</a></div>
+        <div class="eyebrow"><span class="dot"></span>Python 3.11+ · Zero Dependencies · MIT</div>
+        <h1 id="hero-title">Namecheap DNS.<br><span>Guarded for agents.</span></h1>
+        <p class="intro">Inspect zones, preview record diffs, apply state-hash guarded writes with automatic local backups, and verify live public DNS propagation from one deterministic JSON CLI.</p>
+        <div class="pills" aria-label="Highlights">
+          <span class="pill">Dry-run by default</span>
+          <span class="pill">--if-match SHA-256</span>
+          <span class="pill">0600 zone backups</span>
+          <span class="pill">Cloudflare DoH check</span>
+          <span class="pill">Agent Skill included</span>
+        </div>
+        <div class="buttons">
+          <a class="button primary" href="#install">Install CLI</a>
+          <a class="button" href="https://github.com/R-Varun/namecheap-cli/blob/main/skills/namecheap-dns/SKILL.md">Agent Skill</a>
+          <a class="button" href="https://github.com/R-Varun/namecheap-cli">View on GitHub ↗</a>
+        </div>
       </div>
-      <div class="terminal" aria-label="Example DNS preview">
-        <div class="terminal-title">PREVIEW A DNS CHANGE</div>
-        <div class="terminal-body"><pre><span class="comment"># No write happens yet.</span>
-<span class="green">$</span> namecheap dns set example.com @ A 203.0.113.10
 
-<span class="comment">Selected result fields:</span>
+      <div class="terminal" aria-label="Example guarded DNS workflow">
+        <div class="terminal-head">
+          <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>PREVIEW → APPLY → VERIFY</span>
+        </div>
+        <div class="terminal-body"><pre><span class="c-dim"># 1. Dry-run preview (never mutates DNS)</span>
+<span class="c-prompt">$</span> namecheap dns set example.com @ A 203.0.113.10
 {
-  "dry_run": <span class="green">true</span>,
-  "changed": true,
-  "state_hash": "…",
-  "verified": false
-}</pre></div>
-        <div class="terminal-foot">A write needs <code>--yes</code> and the preview's state hash.</div>
+  <span class="c-key">"schema_version"</span>: 1,
+  <span class="c-key">"ok"</span>: <span class="c-ok">true</span>,
+  <span class="c-key">"command"</span>: "dns set",
+  <span class="c-key">"data"</span>: {
+    <span class="c-key">"dry_run"</span>: <span class="c-ok">true</span>,
+    <span class="c-key">"changed"</span>: true,
+    <span class="c-key">"state_hash"</span>: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+  }
+}
+
+<span class="c-dim"># 2. Apply with optimistic concurrency &amp; check live DoH</span>
+<span class="c-prompt">$</span> namecheap dns set example.com @ A 203.0.113.10 --yes --if-match 9f86d0...
+<span class="c-prompt">$</span> namecheap dns check example.com --host @ --type A</pre></div>
+        <div class="terminal-foot">Every mutation requires <code>--yes</code> and the preview's <code>--if-match</code> hash.</div>
       </div>
     </section>
-    <div class="install" id="install"><span class="install-label">INSTALL WITH UV</span><code id="install-command">uv tool install --python 3.12 'git+https://github.com/R-Varun/namecheap-cli@v0.1.0'</code><button class="copy" type="button" id="copy">Copy</button><span id="copy-status" role="status" hidden></span></div>
-    <section class="section" aria-labelledby="purpose-title">
-      <div class="label">A small tool for a real task</div>
-      <h2 id="purpose-title">Let the agent use a CLI.<br>Keep the change easy to inspect.</h2>
-      <div class="features">
-        <article><span class="number">01 / INSPECT</span><h3>One JSON result.</h3><p>Records, diffs, errors, and exit codes have a clear format. Run <code>namecheap schema</code> to discover the commands.</p></article>
-        <article><span class="number">02 / APPLY</span><h3>Preview before a write.</h3><p>Review the diff, then confirm with the observed state hash. Local locks keep CLI writers from overwriting each other.</p></article>
-        <article><span class="number">03 / RECOVER</span><h3>A backup before submission.</h3><p>If a request cannot be verified, the result points to the saved state and recovery journal. No automatic write retries.</p></article>
+
+    <section id="install" aria-label="Install commands">
+      <div class="install-card">
+        <div class="install-top">
+          <div class="install-tabs" role="tablist" aria-label="Package runner">
+            <button class="tab" role="tab" type="button" aria-selected="true" data-cmd="uv tool install 'git+https://github.com/R-Varun/namecheap-cli'" data-hint="Installs the standalone namecheap command in an isolated uv environment.">uv tool</button>
+            <button class="tab" role="tab" type="button" aria-selected="false" data-cmd="uvx --from 'git+https://github.com/R-Varun/namecheap-cli' namecheap schema" data-hint="Try immediately with zero installation or API credentials.">uvx (try now)</button>
+            <button class="tab" role="tab" type="button" aria-selected="false" data-cmd="pipx install 'git+https://github.com/R-Varun/namecheap-cli'" data-hint="Installs globally via pipx on Python 3.11+.">pipx</button>
+          </div>
+          <span class="install-hint" id="install-hint">Installs the standalone namecheap command in an isolated uv environment.</span>
+        </div>
+        <div class="install-row">
+          <code id="install-command">uv tool install 'git+https://github.com/R-Varun/namecheap-cli'</code>
+          <button class="copy" type="button" id="copy">Copy command</button>
+        </div>
+        <span id="copy-status" role="status" aria-live="polite" hidden></span>
       </div>
     </section>
-    <section class="section scope" aria-labelledby="scope-title">
-      <div><div class="label">What it covers</div><h2 id="scope-title">DNS automation.<br>A clear, bounded scope.</h2><p>For AI agents, deployment scripts, and people who want to manage Namecheap DNS without maintaining their own API wrapper.</p></div>
-      <div><ul><li>BasicDNS records, including A, AAAA, CNAME, MX, and TXT</li><li>Nameserver delegation and domain availability checks</li><li>Domain allowlists and separate sandbox credentials</li><li>Zero runtime dependencies; Python 3.11+</li></ul><div class="note"><strong>First public beta.</strong> Tested offline with a local API and concurrent processes. Authenticated provider writes remain unverified. Unsupported DNS settings block writes. No domain purchases or transfers.</div></div>
+
+    <section class="section" id="safety" aria-labelledby="safety-title">
+      <div class="eyebrow">Built for whole-zone replacement safety</div>
+      <h2 id="safety-title">Namecheap's API overwrites every host record at once.<br>This CLI makes every write safe to automate.</h2>
+      <div class="grid-3">
+        <article class="card">
+          <span class="step-num">01 / DETERMINISTIC JSON</span>
+          <h3>Self-describing contract</h3>
+          <p>Every command emits one versioned JSON document on stdout—including invalid flags and provider errors. Run <code>namecheap schema</code> for full command discovery and error semantics.</p>
+        </article>
+        <article class="card">
+          <span class="step-num">02 / GUARDED TRANSACTIONS</span>
+          <h3>State hashes &amp; local locks</h3>
+          <p>Writes hold an account/domain lock, validate your preview's SHA-256 state hash, re-read before submission, preserve email routing metadata, and verify every record and TTL afterward.</p>
+        </article>
+        <article class="card">
+          <span class="step-num">03 / RECOVERY &amp; LIVE DOH</span>
+          <h3>Backups &amp; propagation checks</h3>
+          <p>A <code>0600</code> backup and journal entry are written before any submission. Restore with <code>namecheap restore</code>, and confirm public resolution via <code>namecheap dns check</code>.</p>
+        </article>
+      </div>
     </section>
-    <section class="section"><div class="links"><a href="https://github.com/R-Varun/namecheap-cli#readme">Read the README ↗</a><a href="https://github.com/R-Varun/namecheap-cli/blob/main/docs/safety.md">How writes work ↗</a><a href="https://github.com/R-Varun/namecheap-cli/releases">Releases ↗</a></div></section>
+
+    <section class="section" aria-labelledby="compare-title">
+      <div class="eyebrow">Why a dedicated CLI</div>
+      <h2 id="compare-title">No MCP server overhead. No unguarded XML scripts.</h2>
+      <div class="compare-wrap">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>Namecheap CLI</th>
+              <th>Ad-hoc XML API scripts</th>
+              <th>Always-on MCP servers</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Whole-zone clobber protection</td>
+              <td>Preview diff + <code>--if-match</code> hash + post-write verify</td>
+              <td>Easy to wipe existing MX/TXT records</td>
+              <td>Varies; rarely optimistic-locked</td>
+            </tr>
+            <tr>
+              <td>Context window cost</td>
+              <td>Zero idle tokens; on-demand <code>namecheap schema</code></td>
+              <td>Requires reading custom code</td>
+              <td>Tool schemas loaded every turn</td>
+            </tr>
+            <tr>
+              <td>Pre-write backup &amp; rollback</td>
+              <td>Automatic <code>0600</code> snapshot + <code>namecheap restore</code></td>
+              <td>Manual</td>
+              <td>Manual</td>
+            </tr>
+            <tr>
+              <td>Runtime dependencies</td>
+              <td>Zero (Python 3.11+ stdlib only)</td>
+              <td><code>requests</code> / <code>lxml</code> / <code>dotenv</code></td>
+              <td>Node / Python server runtime</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section split" aria-labelledby="scope-title">
+      <div>
+        <div class="eyebrow">Agent-ready out of the box</div>
+        <h2 id="scope-title">Drop into Claude Code, Codex, Cursor, or CI.</h2>
+        <p>Ships with a portable <code>SKILL.md</code>, machine-readable <code>schema.json</code>, <code>llms.txt</code>, stdin zone piping (<code>dns apply example.com -</code>), domain allowlists, and strict production/sandbox credential isolation.</p>
+      </div>
+      <ul class="check-list">
+        <li><strong>BasicDNS</strong> Manage <code>A</code>, <code>AAAA</code>, <code>ALIAS</code>, <code>CNAME</code>, <code>MX</code>, <code>MXE</code>, <code>NS</code>, <code>TXT</code>, and <code>URL</code>/<code>URL301</code>/<code>FRAME</code> records.</li>
+        <li><strong>Delegation</strong> Inspect and switch between Namecheap BasicDNS and custom nameservers with backup protection.</li>
+        <li><strong>Live DoH</strong> Compare Namecheap's stored zone against Cloudflare public DNS-over-HTTPS via <code>dns check</code>.</li>
+        <li><strong>Bounded scope</strong> Blocks writes when unknown email modes or unsupported dashboard settings appear—never buys or transfers domains.</li>
+      </ul>
+    </section>
+
+    <section class="section" aria-label="Documentation links">
+      <div class="links">
+        <a href="https://github.com/R-Varun/namecheap-cli#readme">README &amp; Quickstart ↗</a>
+        <a href="https://github.com/R-Varun/namecheap-cli/blob/main/docs/agents.md">Agent Integration Guide ↗</a>
+        <a href="https://github.com/R-Varun/namecheap-cli/blob/main/docs/cli.md">Command Reference ↗</a>
+        <a href="https://github.com/R-Varun/namecheap-cli/blob/main/docs/safety.md">Write Safety Model ↗</a>
+        <a href="schema.json">Live schema.json</a>
+        <a href="llms.txt">llms.txt</a>
+      </div>
+    </section>
   </main>
-  <footer><span>Built by <a href="https://github.com/R-Varun">R-Varun</a> · MIT license</span><span>Unofficial. Not affiliated with Namecheap.</span></footer>
+
+  <footer>
+    <span>Built by <a href="https://github.com/R-Varun">R-Varun</a> · Released under the MIT License</span>
+    <span>Unofficial open-source tool · Not affiliated with Namecheap, Inc.</span>
+  </footer>
 </div>
+
 <script>
-document.getElementById('copy').addEventListener('click', async function () {
-  try {
-    await navigator.clipboard.writeText(document.getElementById('install-command').textContent);
-    this.textContent = 'Copied';
-    const status = document.getElementById('copy-status');
-    status.hidden = false; status.textContent = 'Install command copied.';
-  } catch { this.textContent = 'Select text'; }
-});
+(() => {
+  const tabs = document.querySelectorAll('.tab');
+  const cmdEl = document.getElementById('install-command');
+  const hintEl = document.getElementById('install-hint');
+  const copyBtn = document.getElementById('copy');
+  const statusEl = document.getElementById('copy-status');
+  let timer = null;
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+      cmdEl.textContent = tab.dataset.cmd;
+      hintEl.textContent = tab.dataset.hint;
+    });
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    clearTimeout(timer);
+    try {
+      await navigator.clipboard.writeText(cmdEl.textContent);
+      copyBtn.textContent = 'Copied!';
+      statusEl.hidden = false;
+      statusEl.textContent = 'Install command copied to clipboard.';
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(cmdEl);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      copyBtn.textContent = 'Selected';
+    }
+    timer = setTimeout(() => {
+      copyBtn.textContent = 'Copy command';
+      statusEl.hidden = true;
+    }, 2000);
+  });
+})();
 </script>
 </body>
 </html>

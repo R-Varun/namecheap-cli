@@ -19,7 +19,7 @@ ADDRESS_TYPES = frozenset({"A", "AAAA"})
 ANSWERS = ADDRESS_TYPES | {"ALIAS"} | REDIRECTS
 DEFAULT_TTL = 1800
 DEFAULT_MXPREF = 10
-_NAME = re.compile(r"^(?:\*|[a-z0-9_-]+)(?:\.[a-z0-9_-]+)*$")
+_HOST_LABEL = re.compile(r"^_*(?:[a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?)$")
 
 
 def invalid(message: str) -> CliError:
@@ -39,10 +39,18 @@ def relative_name(host: str, domain: str) -> str:
         return "@"
     if name.endswith("." + domain):
         name = name[: -(len(domain) + 1)]
-    if not _NAME.fullmatch(name) or len(name + "." + domain) > 253:
+    if not name or len(name + "." + domain) > 253:
         raise invalid(f"Invalid host name: {host!r}")
-    if any(len(label) > 63 for label in name.split(".")):
-        raise invalid("Host labels must be at most 63 characters.")
+    labels = name.split(".")
+    for index, label in enumerate(labels):
+        if len(label) > 63:
+            raise invalid("Host labels must be at most 63 characters.")
+        if label == "*":
+            if index != 0:
+                raise invalid(f"Invalid host name: {host!r}")
+            continue
+        if not _HOST_LABEL.fullmatch(label):
+            raise invalid(f"Invalid host name: {host!r}")
     return name
 
 
@@ -99,6 +107,8 @@ def make_host(
     if type(mxpref) is not int or not 0 <= mxpref <= 65535:
         raise invalid("MX preference must be an integer from 0 to 65535.")
     if rtype in ADDRESS_TYPES | {"MXE"}:
+        if rtype == "AAAA" and "%" in value:
+            raise invalid("AAAA requires a valid IPv6 address without a zone id.")
         try:
             kind = ipaddress.IPv6Address if rtype == "AAAA" else ipaddress.IPv4Address
             value = str(kind(value))
@@ -111,13 +121,29 @@ def make_host(
     elif rtype in REDIRECTS:
         from urllib.parse import urlsplit
 
+        if any(ch.isspace() or ord(ch) < 32 for ch in value):
+            raise invalid("Redirect URLs must not contain whitespace or control characters.")
         try:
             parsed = urlsplit(value)
-            if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            port = parsed.port
+            if (
+                parsed.scheme not in {"http", "https"}
+                or not parsed.hostname
+                or parsed.username is not None
+                or parsed.password is not None
+                or port == 0
+            ):
                 raise ValueError
-        except ValueError as exc:
+            host_part = parsed.hostname
+            if "%" in host_part:
+                raise ValueError
+            try:
+                ipaddress.ip_address(host_part)
+            except ValueError:
+                domain_name(host_part)
+        except (ValueError, CliError) as exc:
             raise invalid(
-                "Redirect records require an http:// or https:// URL with a host."
+                "Redirect records require a valid http:// or https:// URL without credentials."
             ) from exc
     return Host(relative_name(name, domain), rtype, value, ttl, mxpref)
 
@@ -163,11 +189,14 @@ class Zone:
                 or set(row) - {"name", "type", "address", "ttl", "mxpref"}
             ):
                 raise invalid("Each host needs name, type, address, and optional ttl/mxpref only.")
+            rtype_raw = row["type"]
+            if "mxpref" in row and isinstance(rtype_raw, str) and rtype_raw.strip().upper() != "MX":
+                raise invalid("mxpref is only valid on MX records.")
             hosts.append(
                 make_host(
                     domain,
                     row["name"],
-                    row["type"],
+                    rtype_raw,
                     row["address"],
                     row.get("ttl", DEFAULT_TTL),
                     row.get("mxpref", DEFAULT_MXPREF),

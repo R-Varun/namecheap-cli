@@ -163,3 +163,101 @@ def test_human_output_does_not_mix_with_json(env, factory, capsys):
         == 0
     )
     assert "example.com: dry run" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["--s", "dns", "list", DOMAIN],
+        ["domains", "list", "--a"],
+        ["dns", "set", DOMAIN, "@", "A", "192.0.2.1", "--y"],
+    ],
+)
+def test_prefix_abbreviations_are_refused(run, args):
+    code, result = run(*args)
+    assert code == 2 and result["error"]["code"] == "usage"
+
+
+def test_config_disallow_and_noop(run, tmp_path):
+    path = tmp_path / "cfg" / "config.json"
+    run(
+        "--config",
+        str(path),
+        "config",
+        "init",
+        "--domain",
+        DOMAIN,
+        "--domain",
+        "example.net",
+        custom_env={},
+    )
+    code, result = run(
+        "--config", str(path), "config", "disallow", "EXAMPLE.NET.", "absent.example", custom_env={}
+    )
+    assert code == 0
+    assert result["data"]["allowed_domains"] == [DOMAIN]
+    assert result["data"]["removed"] == ["example.net"]
+
+
+def test_dns_apply_stdin_and_validation_before_credentials(env, factory, capsys):
+    import io
+
+    zone_payload = {
+        "domain": DOMAIN,
+        "email_type": "FWD",
+        "hosts": [{"name": "@", "type": "A", "address": "192.0.2.55", "ttl": 1800}],
+    }
+    code = main(
+        ["dns", "apply", DOMAIN, "-"],
+        env=env,
+        client_factory=factory,
+        stdin=io.StringIO(json.dumps(zone_payload)),
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert code == 0 and payload["data"]["changed"] and payload["data"]["dry_run"]
+
+    # Local record/flag validation runs before credential lookup or IP detection.
+    no_creds_env = {"NAMECHEAP_CONFIG_FILE": env["NAMECHEAP_CONFIG_FILE"]}
+    for bad_argv in (
+        ["dns", "set", DOMAIN, "-bad", "A", "192.0.2.1"],
+        ["dns", "set", DOMAIN, "@", "A", "192.0.2.1", "--mxpref", "10"],
+        ["dns", "set", DOMAIN, "@", "A", "192.0.2.1", "--yes"],
+        ["dns", "set", DOMAIN, "@", "A", "192.0.2.1", "--if-match", "bad"],
+        ["ns", "set", DOMAIN, "--custom", "only-one.example.net"],
+        ["dns", "check", DOMAIN, "--host", "-bad"],
+    ):
+        code = main(bad_argv, env=no_creds_env, client_factory=factory)
+        err = json.loads(capsys.readouterr().out)
+        assert code == 2 and err["error"]["code"] != "credentials_missing"
+
+
+def test_cli_dns_check_and_schema_groups(env, factory, api, capsys):
+    from namecheap_cli.records import Host, Zone
+
+    api.zone = Zone(
+        DOMAIN,
+        (
+            Host("@", "A", "192.0.2.10"),
+            Host("@", "URL", "https://www.example.com/"),
+        ),
+        "FWD",
+    )
+    code = main(
+        ["dns", "check", DOMAIN],
+        env=env,
+        client_factory=factory,
+        doh_resolver=lambda qname, rtype: ["192.0.2.10"],
+    )
+    res = json.loads(capsys.readouterr().out)
+    assert code == 0 and res["data"]["propagated"] is True
+    assert res["data"]["checked_count"] == 1 and res["data"]["synthetic_count"] == 1
+
+    data = schema(build_parser())
+    ns_set = next(c for c in data["commands"] if c["command"] == "ns set")
+    assert any(
+        g["required"] and "--custom" in g["flags"] for g in ns_set["mutually_exclusive_groups"]
+    )
+    cfg_init = next(c for c in data["commands"] if c["command"] == "config init")
+    domain_arg = next(a for a in cfg_init["arguments"] if a["name"] == "domain")
+    assert domain_arg["repeatable"] is True
+    assert "stale_state" in data["error_codes"]

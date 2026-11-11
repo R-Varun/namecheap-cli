@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a reproducible issue in namecheap-cli
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Security reminder:** Redact real domain names (use `example.com`), usernames, API keys, and whitelisted IP addresses before submitting.
+  - type: input
+    id: command
+    attributes:
+      label: Command invoked
+      description: Exact subcommand and flags (with synthetic domain/values)
+      placeholder: "namecheap dns set example.com @ A 203.0.113.10"
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Sanitized JSON output & exit code
+      description: Paste the sanitized JSON output and exit status
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: CLI version (`namecheap --version`), Python version, and OS
+      placeholder: "namecheap 0.2.0, Python 3.12, macOS 15"
+    validations:
+      required: true

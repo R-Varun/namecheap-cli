@@ -1,4 +1,4 @@
-"""Synthetic API transport. This is a test double, not live-provider evidence."""
+"""Synthetic API transport for deterministic offline CLI and service behavior tests."""
 
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer

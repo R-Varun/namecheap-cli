@@ -1,58 +1,66 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Namecheap CLI — DNS for agents and scripts" width="920">
+  <img src="assets/banner.png" alt="namecheap-cli — titanium keystone and ice-blue alignment seam" width="920">
 </p>
 
-# Namecheap CLI: DNS automation for AI agents and scripts
+<h1 align="center">Namecheap CLI</h1>
 
-[![Tests](https://github.com/R-Varun/namecheap-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/R-Varun/namecheap-cli/actions/workflows/ci.yml)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776ab)](https://www.python.org/)
-[![MIT license](https://img.shields.io/badge/license-MIT-397c54)](LICENSE)
+<p align="center">
+  <strong>Guarded Namecheap DNS automation for AI agents, CI pipelines, and terminal workflows.</strong>
+</p>
 
-Manage Namecheap DNS records and nameservers from your terminal or an AI agent.
-No one-off API scripts. No guessing whether a command changed something.
+<p align="center">
+  <a href="https://github.com/R-Varun/namecheap-cli/actions/workflows/ci.yml"><img src="https://github.com/R-Varun/namecheap-cli/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://r-varun.github.io/namecheap-cli/"><img src="https://img.shields.io/badge/docs-r--varun.github.io-8ADAE6?labelColor=080A0D" alt="Website"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%2B-3776AB?labelColor=080A0D" alt="Python 3.11+"></a>
+  <a href="pyproject.toml"><img src="https://img.shields.io/badge/dependencies-zero-BFC2C4?labelColor=080A0D" alt="Zero runtime dependencies"></a>
+  <a href="skills/namecheap-dns/SKILL.md"><img src="https://img.shields.io/badge/agent_skill-SKILL.md-377382?labelColor=080A0D" alt="Agent Skill"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-424C55?labelColor=080A0D" alt="MIT License"></a>
+</p>
 
-The CLI returns JSON, previews every DNS change, and saves a backup before it
-writes. An agent can inspect a domain, prepare its records, apply an authorized
-change, and check the result using the same small set of commands.
+---
 
-**Unofficial. No affiliation with Namecheap.** This first release is a beta.
-It has automated offline tests, including a local HTTP API and multiple CLI
-processes. Authenticated sandbox and live writes have not been validated yet.
+Namecheap's `domains.dns.setHosts` XML endpoint **overwrites an entire zone in a single call**—one missing field in an ad-hoc script can wipe existing `MX`, `TXT`, or `CNAME` records.
 
-## What it does
+`namecheap-cli` wraps Namecheap BasicDNS and nameserver management in a zero-dependency CLI engineered for autonomous AI agents and deterministic scripts:
 
-- Read and edit BasicDNS host records: A, AAAA, ALIAS, CNAME, MX, MXE, NS, TXT,
-  and URL redirects.
-- Read and change nameservers.
-- List account domains and check domain availability.
-- Return structured errors, diffs, state hashes, backups, and recovery paths.
-- Keep production and sandbox credentials and state separate.
+- **Dry-run by default** — Every mutation (`dns set`, `dns add`, `dns remove`, `dns apply`, `ns set`, `restore`) computes a structured diff and SHA-256 `state_hash` without touching live DNS until `--yes --if-match <HASH>` is supplied.
+- **Versioned JSON contract** — Every command prints one `schema_version: 1` JSON envelope on `stdout` (including validation errors and exit codes), with `--human` available for terse terminal output.
+- **Guarded whole-zone writes** — Holds a local per-account/domain lock, writes a `0600` backup and recovery journal before calling `setHosts`, preserves mail-routing modes (`MX`, `MXE`, `FWD`, `OX`), and verifies every record, TTL, and MX preference afterward.
+- **Live public DNS verification** — `namecheap dns check` queries Cloudflare DNS-over-HTTPS to confirm public resolvers match Namecheap's stored zone.
 
-It does not register, renew, buy, or transfer domains. DNSSEC, SRV, CAA, and
-provider-managed DNS settings are outside the first release. A zone containing
-unsupported records or settings is readable, but record writes stop rather
-than risk losing data.
+## Why `namecheap-cli`?
+
+| Capability | `namecheap-cli` | Ad-hoc XML scripts | Always-on MCP servers |
+|---|---|---|---|
+| **Whole-zone clobber protection** | Diff preview + `--if-match` SHA-256 + post-write verify | Easy to drop `MX`/`TXT` records | Rarely optimistic-locked |
+| **Pre-write backup & rollback** | Automatic `0600` backup + `namecheap restore` | Manual | Manual |
+| **Idle context window cost** | **0 tokens** until needed (`namecheap schema`) | Requires reading custom script | Tool definitions loaded every turn |
+| **Live propagation verification** | Built-in `namecheap dns check` (Cloudflare DoH) | Separate `dig` / `nslookup` glue | Separate tooling |
+| **Runtime footprint** | **Python 3.11+ stdlib only** (0 dependencies) | `requests`, `lxml`, `python-dotenv` | Persistent Node/Python server |
 
 ## Install
 
-Requires Python 3.11 or newer. There are no runtime dependencies.
-
-With [uv](https://docs.astral.sh/uv/):
+Requires **Python 3.11+** with zero third-party runtime dependencies.
 
 ```sh
-uv tool install --python 3.12 'git+https://github.com/R-Varun/namecheap-cli@v0.1.0'
-namecheap --help
+# Install globally in an isolated environment with uv
+uv tool install 'git+https://github.com/R-Varun/namecheap-cli'
+
+# Or with pipx
+pipx install 'git+https://github.com/R-Varun/namecheap-cli'
 ```
 
-Or use `pipx install 'git+https://github.com/R-Varun/namecheap-cli@v0.1.0'`
-with a supported Python. The package is called `namecheap-agent-cli`; the
-command is `namecheap`. It is installed from GitHub, not PyPI.
+Want to inspect the full command and schema catalogue first with **zero installation and no API credentials**?
 
-## Set it up
+```sh
+uvx --from 'git+https://github.com/R-Varun/namecheap-cli' namecheap schema
+```
 
-Enable [Namecheap API access](https://www.namecheap.com/support/api/intro/) and
-whitelist your machine's public IPv4 in your Namecheap account. Namecheap sets
-its own eligibility rules for API access.
+## Quickstart
+
+### 1. Configure allowlist & credentials
+
+Enable [Namecheap API access](https://www.namecheap.com/support/api/intro/) and whitelist your machine's public IPv4 address in your Namecheap account.
 
 ```sh
 namecheap config init --domain example.com
@@ -60,123 +68,114 @@ namecheap auth setup --username YOUR_NAMECHEAP_USERNAME
 namecheap doctor
 ```
 
-`auth setup` asks for the API key at a hidden terminal prompt and stores it in
-a private local file. Agents can receive `NAMECHEAP_API_USER` and
-`NAMECHEAP_API_KEY` through their secret manager or environment instead.
-Do not put keys in prompts or command-line arguments.
+- `auth setup` reads your API key from a hidden terminal prompt and saves it to a `0600` local credential file.
+- For agents and CI, pass `NAMECHEAP_API_USER` and `NAMECHEAP_API_KEY` via your secret store or environment instead—never pass keys on the command line or inside prompts.
+- Only allowlisted domains can be read or modified by domain-targeted commands. Manage scope with `namecheap config allow example.net` and `namecheap config disallow example.net`.
 
-Only listed domains can be read or changed through domain-specific commands.
-To add another domain you are authorized to manage:
+### 2. Preview, apply, and verify live DNS
 
 ```sh
-namecheap config allow example.net
-```
-
-## Preview, then apply
-
-Read the current records:
-
-```sh
+# 1. Inspect current zone
 namecheap dns list example.com
-```
 
-Preview an edit:
-
-```sh
+# 2. Preview a change (read-only dry run; returns diff + state_hash)
 namecheap dns set example.com @ A 203.0.113.10
+
+# 3. Apply using the 64-character SHA-256 state_hash from step 2
+namecheap dns set example.com @ A 203.0.113.10 --yes --if-match <STATE_HASH>
+
+# 4. Verify live public DNS propagation over HTTPS
+namecheap dns check example.com --host @ --type A
 ```
 
-Read `data.diff`, `warnings`, and `data.state_hash` in the result. Then apply
-that edit using the returned state hash:
+### Common operations
 
 ```sh
-namecheap dns set example.com @ A 203.0.113.10 --yes --if-match STATE_HASH
-```
-
-`STATE_HASH` above is a placeholder for the full hash from your preview. If the
-domain changed in the meantime, the command refuses the stale write.
-
-`set` replaces all records of the same type at that host, plus records that
-conflict with the new one. Use `add` when you want another A, MX, or TXT value.
-Adding an identical record and removing an absent record are no-ops.
-
-More examples:
-
-```sh
+# Records: set replaces conflicting/same-type records; add appends multi-value records
 namecheap dns set example.com www CNAME @
-namecheap dns add example.com @ TXT 'site-verification=example'
-namecheap dns remove example.com old A --value 203.0.113.20
+namecheap dns add example.com @ TXT 'v=spf1 include:_spf.example.net ~all'
+namecheap dns add example.com @ MX mail.example.com --mxpref 10 --email-type MX
+namecheap dns remove example.com staging A --value 203.0.113.20
+
+# Atomic multi-record zone apply from a file or stdin (-)
+namecheap dns apply example.com zone.json
+jq '.data.zone | .hosts += [{"name":"api","type":"A","address":"203.0.113.30","ttl":1800}]' current.json \
+  | namecheap dns apply example.com -
+
+# Nameserver delegation & availability checks
+namecheap ns list example.com
 namecheap ns set example.com --custom ns1.example.net ns2.example.net
+namecheap domains list
 namecheap domains check example.org example.net
 ```
 
-Every edit shown above is a dry run. Confirmed writes need both `--yes` and
-`--if-match`. Use `--human` for a short terminal view.
+## Built for AI Agents
 
-## Built for agents
+No MCP server or custom XML wrapper needed—agents invoke `namecheap` directly over `subprocess` and parse deterministic JSON on `stdout`.
+
+### Install the bundled Agent Skill (`SKILL.md`)
+
+Copy [`skills/namecheap-dns`](skills/namecheap-dns/SKILL.md) into your agent's skills directory (Claude Code, Codex, Cursor, OpenClaw):
 
 ```sh
-namecheap schema
+# Claude Code
+mkdir -p ~/.claude/skills && cp -R skills/namecheap-dns ~/.claude/skills/
+
+# Codex / cross-agent ~/.agents/skills
+mkdir -p ~/.agents/skills && cp -R skills/namecheap-dns ~/.agents/skills/
 ```
 
-This returns command arguments, output schemas, the zone-file schema, and exit
-codes. Normal commands print exactly one JSON document, including failures.
-They do not prompt for confirmation. The output envelope is versioned:
+### Or add a 5-line `CLAUDE.md` / `AGENTS.md` rule
 
-```json
-{
-  "schema_version": 1,
-  "ok": false,
-  "command": "dns set",
-  "error": {
-    "code": "stale_state",
-    "message": "The domain changed since the preview. Preview again.",
-    "details": {},
-    "retryable": false
-  }
-}
+```markdown
+## Namecheap DNS (`namecheap`)
+- Run `namecheap schema` to inspect commands, arguments, zone schema, and error codes.
+- Always preview mutations without `--yes` first, inspect `data.diff` and `warnings`, then apply with `--yes --if-match <data.state_hash>`.
+- Pass arguments as an argv array (never shell-interpolate TXT values) or pipe zone JSON to `namecheap dns apply <domain> -`.
+- Confirm public resolver propagation with `namecheap dns check <domain>` when needed.
 ```
 
-Start with the [agent guide](docs/agents.md) and [command reference](docs/cli.md).
-For several record changes, export `data.zone` from `dns list`, edit that JSON,
-and use `dns apply example.com zone.json`. That applies one complete record set.
+Machine-readable discovery endpoints are also hosted at [`schema.json`](https://r-varun.github.io/namecheap-cli/schema.json) and [`llms.txt`](https://r-varun.github.io/namecheap-cli/llms.txt).
 
-## What protects a write
+## Write Safety & Recovery
 
-Namecheap's `setHosts` replaces the whole zone. This CLI holds a local
-account/domain lock, checks the preview's state hash, saves a private backup
-and journal, reads again for outside edits, submits once, and verifies the
-records, TTLs, MX preferences, and email mode.
+Every confirmed write executes a strict transaction:
 
-If a submitted write cannot be verified, exit code 4 includes recovery paths.
-Inspect the current state before retrying. To preview a restoration:
+1. Acquires a local lock scoped to `(account, environment, domain)`.
+2. Reads the live zone and verifies `--if-match` matches the canonical SHA-256 `state_hash`.
+3. Writes a `0600` JSON backup and `"prepared"` recovery journal entry.
+4. Re-reads immediately before submission to catch concurrent external changes.
+5. Submits `setHosts` / `setCustom` / `setDefault` once (never auto-retries writes).
+6. Reads back and verifies every host record, TTL, MX preference, and email mode.
+
+If a write cannot be verified (exit code `4`, `write_unverified`), inspect `error.details.outcome` (`"rejected"` vs `"unknown"`) and preview a rollback from the automatic backup:
 
 ```sh
 namecheap restore /path/from/result/backup.json
+namecheap restore /path/from/result/backup.json --yes --if-match <STATE_HASH>
 ```
 
-Restoration is another guarded change. A nameserver backup restores delegation
-only. Check records at the DNS provider separately.
+**Scope boundaries:** `namecheap-cli` manages BasicDNS host records (`A`, `AAAA`, `ALIAS`, `CNAME`, `MX`, `MXE`, `NS`, `TXT`, `URL`, `URL301`, `FRAME`), nameserver delegation, account domain listing, availability checks, and public DoH verification. It never purchases, renews, or transfers domains, and it blocks writes rather than clobbering unsupported dashboard settings (such as DDNS or inactive host rows).
 
-The lock coordinates processes sharing the same local state directory. It
-cannot lock the Namecheap dashboard or another machine. The last read narrows
-that race; it cannot make the provider's write atomic. Avoid other DNS writers
-while a change is running.
+## Troubleshooting
 
-The CLI preserves supported email modes. It will not guess a missing mode or
-assume that omitting a parameter turns email off. Intentional mail changes
-need `--email-type MX|MXE|FWD|OX`; adding custom MX records also needs an explicit
-mode change. Read [the safety notes](docs/safety.md) before using production.
+| Error Code | Exit | Cause & Resolution |
+|---|---|---|
+| `credentials_missing` | `66` | Run `namecheap auth setup --username USER` or set `NAMECHEAP_API_USER` + `NAMECHEAP_API_KEY`. |
+| `ip_detection_failed` | `1` | Set `NAMECHEAP_CLIENT_IP` to your Namecheap-whitelisted public IPv4 address. |
+| `out_of_scope` | `3` | Domain is not in your local allowlist. Run `namecheap config allow <domain>`. |
+| `stale_state` | `3` | Zone changed after your preview. Re-run the dry-run preview and use the new `state_hash`. |
+| `external_dns` | `3` | Domain uses custom third-party nameservers (`ns list`) instead of Namecheap BasicDNS. |
+| `email_mode_unknown` | `3` | Pass an explicit `--email-type` (`MX`, `MXE`, `FWD`, `OX`) when altering mail routing. |
+| `write_unverified` | `4` | Check `namecheap dns list <domain>` and `error.details.recovery.backup_file` before retrying. |
 
-## Configuration and sandbox
+## Documentation
 
-Default files live under `~/.config/namecheap-cli/` and
-`~/.local/state/namecheap-cli/` on macOS/Linux, or AppData on Windows.
-See [configuration](docs/configuration.md) for paths and environment variables.
-
-Use `--sandbox` with separate `NAMECHEAP_SANDBOX_API_USER` and
-`NAMECHEAP_SANDBOX_API_KEY` credentials. Production environment variables are
-never used as fallback sandbox credentials.
+- [Agent Integration Guide](docs/agents.md) — Subprocess patterns, batch stdin edits, and error handling
+- [Command Contract](docs/cli.md) — All 18 commands, JSON envelope structure, and exit codes
+- [Write Safety Model](docs/safety.md) — Locking, whole-zone hazards, email modes, and recovery journals
+- [Configuration & Sandbox](docs/configuration.md) — Paths, environment variables, `--sandbox` isolation, and rate spacing
+- [Installable Agent Skill](skills/namecheap-dns/SKILL.md) — Ready-to-drop `SKILL.md` for coding agents
 
 ## Development
 
@@ -187,9 +186,11 @@ uv sync --extra dev
 uv run pytest --cov=namecheap_cli --cov-report=term-missing
 uv run ruff check .
 uv run ruff format --check .
-uv build
+uv build && uv run python scripts/check_distribution.py
 ```
 
-Tests use synthetic domains and credentials. CI checks Python 3.11–3.14 on
-Linux, plus macOS and Windows. See [contributing](CONTRIBUTING.md),
-[security](SECURITY.md), and the [MIT license](LICENSE).
+CI validates Python 3.11–3.14 on Linux plus macOS and Windows, verifies wheel and sdist metadata in clean environments, and builds the static documentation site. See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [CHANGELOG.md](CHANGELOG.md), and [LICENSE](LICENSE).
+
+---
+
+<sub>Unofficial open-source project. Not affiliated with, endorsed by, or sponsored by Namecheap, Inc.</sub>

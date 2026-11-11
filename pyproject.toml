@@ -4,15 +4,15 @@ build-backend = "hatchling.build"
 
 [project]
 name = "namecheap-agent-cli"
-version = "0.1.0"
-description = "Namecheap DNS CLI for AI agents and scripts: JSON output, dry runs, guarded writes, and recovery."
+version = "0.2.0"
+description = "Namecheap DNS CLI for AI agents and scripts: JSON output, dry runs, guarded writes, live DNS checks, and recovery."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{name = "R-Varun"}]
-keywords = ["namecheap", "dns", "cli", "ai-agents", "dns-automation", "nameservers"]
+keywords = ["namecheap", "dns", "cli", "ai-agents", "dns-automation", "nameservers", "agent-tools"]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
@@ -27,9 +27,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/R-Varun/namecheap-cli"
-Documentation = "https://github.com/R-Varun/namecheap-cli#readme"
+Homepage = "https://r-varun.github.io/namecheap-cli/"
+Documentation = "https://r-varun.github.io/namecheap-cli/"
 Repository = "https://github.com/R-Varun/namecheap-cli"
+Changelog = "https://github.com/R-Varun/namecheap-cli/blob/main/CHANGELOG.md"
 Issues = "https://github.com/R-Varun/namecheap-cli/issues"
 
 [project.scripts]
@@ -42,7 +43,7 @@ dev = ["pytest>=8.3,<10", "pytest-cov>=6,<8", "hypothesis>=6.120,<7", "ruff>=0.1
 packages = ["src/namecheap_cli"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src", "tests", "docs", "assets", "README.md", "LICENSE", "AGENTS.md", "CLAUDE.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "pyproject.toml"]
+include = ["src", "tests", "docs", "assets", "skills", "README.md", "LICENSE", "AGENTS.md", "CLAUDE.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "pyproject.toml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

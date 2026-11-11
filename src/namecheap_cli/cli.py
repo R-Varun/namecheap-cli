@@ -8,15 +8,19 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
-from .client import Client, detect_ipv4, ipv4
+from .client import Client, detect_ipv4, ipv4, resolve_doh
 from .config import Config, Credentials, config_path, domain_name, setup_credentials, state_path
 from .errors import CliError
-from .records import EMAIL_TYPES, TYPES
+from .records import DEFAULT_MXPREF, EMAIL_TYPES, TYPES, Zone, make_host, relative_name
 from .service import Service
-from .storage import atomic_json, read_json
+from .storage import atomic_json, read_json, read_json_stdin
 
 
 class Parser(argparse.ArgumentParser):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("allow_abbrev", False)
+        super().__init__(*args, **kwargs)
+
     def error(self, message):
         raise CliError("usage", message)
 
@@ -70,10 +74,12 @@ def build_parser() -> Parser:
             help="explicit email-mode change; omitted means preserve",
         )
 
-    config = group("config", "set the domain allowlist")
+    config = group("config", "manage the local domain allowlist")
     p = command(config, "init", "create a configuration with allowed domains")
     p.add_argument("--domain", action="append", default=[], help="allow a domain (repeatable)")
     p = command(config, "allow", "allow one or more domains you are authorized to manage")
+    p.add_argument("domains", nargs="+")
+    p = command(config, "disallow", "remove one or more domains from the local allowlist")
     p.add_argument("domains", nargs="+")
     command(config, "show", "show non-secret configuration")
     auth = group("auth", "store credentials from a hidden prompt")
@@ -83,7 +89,7 @@ def build_parser() -> Parser:
     p.add_argument("--username", required=True)
     p.add_argument("--force", action="store_true")
     command(groups, "doctor", "check configuration, IPv4, and read-only API access")
-    command(groups, "schema", "describe commands, JSON output, and zone-file schemas")
+    command(groups, "schema", "describe commands, JSON output, error codes, and zone-file schemas")
     domains = group("domains", "list domains or check availability")
     p = command(domains, "list", "list allowed domains in the account")
     p.add_argument(
@@ -91,9 +97,13 @@ def build_parser() -> Parser:
     )
     p = command(domains, "check", "check registration availability; never registers a domain")
     p.add_argument("names", nargs="+")
-    dns = group("dns", "read and edit BasicDNS records")
+    dns = group("dns", "read, verify, and edit BasicDNS records")
     p = command(dns, "list", "return the zone and its state hash")
     p.add_argument("domain")
+    p = command(dns, "check", "compare Namecheap zone records against live public DNS")
+    p.add_argument("domain")
+    p.add_argument("--host", help="optional host filter (@, relative name, or FQDN)")
+    p.add_argument("--type", dest="rtype", type=str.upper, choices=TYPES, help="record type filter")
     for action in ("add", "set", "remove"):
         p = command(
             dns,
@@ -114,12 +124,12 @@ def build_parser() -> Parser:
         else:
             p.add_argument("value")
             p.add_argument("--ttl", type=int, default=1800)
-            p.add_argument("--mxpref", type=int, default=10)
+            p.add_argument("--mxpref", type=int, default=None, help="MX priority (MX records only)")
         write(p)
         email(p)
-    p = command(dns, "apply", "replace the whole zone from a zone JSON file")
+    p = command(dns, "apply", "replace the whole zone from a zone JSON file or '-' for stdin")
     p.add_argument("domain")
-    p.add_argument("file", type=Path)
+    p.add_argument("file", help="path to zone JSON file, or '-' to read from standard input")
     write(p)
     email(p)
     ns = group("ns", "read and change nameserver delegation")
@@ -135,6 +145,49 @@ def build_parser() -> Parser:
     p.add_argument("file", type=Path)
     write(p)
     return parser
+
+
+ERROR_CATALOGUE = {
+    "usage": {"exit_code": 2, "retryable": False},
+    "config_missing": {"exit_code": 2, "retryable": False},
+    "invalid_config": {"exit_code": 2, "retryable": False},
+    "invalid_domain": {"exit_code": 2, "retryable": False},
+    "invalid_record": {"exit_code": 2, "retryable": False},
+    "invalid_nameservers": {"exit_code": 2, "retryable": False},
+    "invalid_file": {"exit_code": 2, "retryable": False},
+    "invalid_backup": {"exit_code": 2, "retryable": False},
+    "invalid_state_hash": {"exit_code": 2, "retryable": False},
+    "preview_required": {"exit_code": 2, "retryable": False},
+    "file_exists": {"exit_code": 2, "retryable": False},
+    "unsafe_file": {"exit_code": 2, "retryable": False},
+    "local_io_error": {"exit_code": 2, "retryable": False},
+    "ipv4_required": {"exit_code": 2, "retryable": False},
+    "terminal_required": {"exit_code": 2, "retryable": False},
+    "invalid_username": {"exit_code": 2, "retryable": False},
+    "invalid_key": {"exit_code": 2, "retryable": False},
+    "unsafe_credentials": {"exit_code": 2, "retryable": False},
+    "invalid_credentials": {"exit_code": 66, "retryable": False},
+    "credentials_missing": {"exit_code": 66, "retryable": False},
+    "credentials_incomplete": {"exit_code": 66, "retryable": False},
+    "out_of_scope": {"exit_code": 3, "retryable": False},
+    "external_dns": {"exit_code": 3, "retryable": False},
+    "unsupported_metadata": {"exit_code": 3, "retryable": False},
+    "unsupported_record": {"exit_code": 3, "retryable": False},
+    "email_mode_unknown": {"exit_code": 3, "retryable": False},
+    "stale_state": {"exit_code": 3, "retryable": False},
+    "busy": {"exit_code": 3, "retryable": True},
+    "ip_detection_failed": {"exit_code": 1, "retryable": True},
+    "network_error": {"exit_code": 1, "retryable": True},
+    "http_error": {"exit_code": 1, "retryable": True},
+    "doh_error": {"exit_code": 1, "retryable": True},
+    "provider_error": {"exit_code": 1, "retryable": False},
+    "availability_failed": {"exit_code": 1, "retryable": False},
+    "invalid_response": {"exit_code": 1, "retryable": False},
+    "redirect_refused": {"exit_code": 1, "retryable": False},
+    "write_rejected": {"exit_code": 1, "retryable": False},
+    "write_unverified": {"exit_code": 4, "retryable": False},
+    "interrupted": {"exit_code": 130, "retryable": False},
+}
 
 
 def schema(parser: argparse.ArgumentParser) -> dict:
@@ -154,6 +207,7 @@ def schema(parser: argparse.ArgumentParser) -> dict:
                 "name": a.dest,
                 "flags": a.option_strings,
                 "required": a.required,
+                "repeatable": isinstance(a, argparse._AppendAction),
                 "help": a.help or "",
                 "nargs": a.nargs,
                 "type": "integer" if a.type is int else "boolean" if a.nargs == 0 else "string",
@@ -161,8 +215,23 @@ def schema(parser: argparse.ArgumentParser) -> dict:
             if a.choices is not None:
                 item["choices"] = list(a.choices)
             args.append(item)
+        mutex = [
+            {
+                "required": group_item.required,
+                "flags": [
+                    act.option_strings[0] for act in group_item._group_actions if act.option_strings
+                ],
+            }
+            for group_item in p._mutually_exclusive_groups
+            if group_item._group_actions
+        ]
         commands.append(
-            {"command": " ".join(path), "description": p.description, "arguments": args}
+            {
+                "command": " ".join(path),
+                "description": p.description,
+                "arguments": args,
+                "mutually_exclusive_groups": mutex,
+            }
         )
 
     walk(parser, [])
@@ -189,6 +258,12 @@ def schema(parser: argparse.ArgumentParser) -> dict:
                         "ttl": {"type": "integer", "minimum": 60, "maximum": 60000},
                         "mxpref": {"type": "integer", "minimum": 0, "maximum": 65535},
                     },
+                    "allOf": [
+                        {
+                            "if": {"not": {"properties": {"type": {"const": "MX"}}}},
+                            "then": {"not": {"required": ["mxpref"]}},
+                        }
+                    ],
                 },
             },
         },
@@ -229,6 +304,7 @@ def schema(parser: argparse.ArgumentParser) -> dict:
         "commands": commands,
         "output_schema": envelope,
         "zone_file_schema": zone,
+        "error_codes": ERROR_CATALOGUE,
         "exit_codes": {
             "0": "success",
             "1": "provider/network failure",
@@ -241,7 +317,24 @@ def schema(parser: argparse.ArgumentParser) -> dict:
     }
 
 
-def dispatch(args, env, secrets: list[str], client_factory) -> dict:
+def _validate_write_flags(yes: bool, if_match: str | None) -> None:
+    if yes and not if_match:
+        raise CliError("preview_required", "Preview first, then pass --yes --if-match STATE_HASH.")
+    if if_match and (len(if_match) != 64 or any(c not in "0123456789abcdef" for c in if_match)):
+        raise CliError(
+            "invalid_state_hash", "Expected a 64-character lowercase SHA-256 state hash."
+        )
+
+
+def dispatch(
+    args,
+    env,
+    secrets: list[str],
+    client_factory,
+    *,
+    stdin: Any = None,
+    doh_resolver=resolve_doh,
+) -> dict:
     path = getattr(args, "config", config_path(env)).expanduser().absolute()
     profile = "sandbox" if getattr(args, "sandbox", False) else "production"
     if args.group == "schema":
@@ -257,6 +350,13 @@ def dispatch(args, env, secrets: list[str], client_factory) -> dict:
                 tuple(sorted(set(config.allowed_domains) | {domain_name(n) for n in args.domains})),
             )
             atomic_json(path, config.to_json())
+        elif args.action == "disallow":
+            config = Config.load(path)
+            targets = {domain_name(n) for n in args.domains}
+            removed = sorted(set(config.allowed_domains) & targets)
+            config = Config(path, tuple(sorted(set(config.allowed_domains) - targets)))
+            atomic_json(path, config.to_json())
+            return {**config.to_json(), "removed": removed, "path": str(path)}
         else:
             config = Config.load(path)
         return {**config.to_json(), "path": str(path)}
@@ -264,14 +364,46 @@ def dispatch(args, env, secrets: list[str], client_factory) -> dict:
         file = setup_credentials(path, profile, args.username, force=args.force)
         return {"stored": str(file), "profile": profile}
     config = Config.load(path)
-    # Scope is checked before credentials, IP detection, and network access.
-    if hasattr(args, "domain"):
-        config.require(args.domain)
+    # Scope and local input syntax are checked before credentials, IP detection, and network access.
+    domain = config.require(args.domain) if hasattr(args, "domain") else None
+    write = {"yes": getattr(args, "yes", False), "if_match": getattr(args, "if_match", None)}
+    _validate_write_flags(**write)
+    zone_data = None
+    if args.group == "domains" and args.action == "check":
+        checked_names = list(dict.fromkeys(domain_name(n) for n in args.names))
+    else:
+        checked_names = []
     if args.group == "restore":
         saved = read_json(args.file)
         if not isinstance(saved, dict) or not isinstance(saved.get("before"), dict):
             raise CliError("invalid_backup", "Expected a backup object with a before snapshot.")
         config.require(saved["before"].get("domain", ""))
+    elif args.group == "ns" and args.action == "set":
+        if args.custom is not None:
+            normalized = sorted(domain_name(server) for server in args.custom)
+            if not 2 <= len(normalized) <= 12 or len(set(normalized)) != len(normalized):
+                raise CliError("invalid_nameservers", "Provide 2–12 distinct nameservers.")
+    elif args.group == "dns" and args.action == "check":
+        if args.host is not None:
+            relative_name(args.host, domain)
+    elif args.group == "dns" and args.action == "apply":
+        zone_data = read_json_stdin(stdin) if args.file == "-" else read_json(Path(args.file))
+        Zone.from_json(domain, zone_data)
+    elif args.group == "dns" and args.action in {"add", "set", "remove"}:
+        if getattr(args, "mxpref", None) is not None and args.type != "MX":
+            raise CliError("invalid_record", "mxpref is only valid on MX records.")
+        if args.action == "remove" and args.value is None:
+            relative_name(args.host, domain)
+        else:
+            make_host(
+                domain,
+                args.host,
+                args.type,
+                args.value,
+                getattr(args, "ttl", 1800),
+                DEFAULT_MXPREF if getattr(args, "mxpref", None) is None else args.mxpref,
+            )
+
     credentials = Credentials.load(path, profile, env)
     secrets.append(credentials.api_key)
     address = (
@@ -294,33 +426,35 @@ def dispatch(args, env, secrets: list[str], client_factory) -> dict:
         }
     if args.group == "domains":
         if args.action == "check":
-            return {"results": api.check(list(dict.fromkeys(domain_name(n) for n in args.names)))}
+            return {"results": api.check(checked_names)}
         all_rows = api.domains()
         rows = [row for row in all_rows if args.all or row["name"] in config.allowed_domains]
         return {"domains": rows, "hidden_count": len(all_rows) - len(rows)}
-    write = {"yes": getattr(args, "yes", False), "if_match": getattr(args, "if_match", None)}
     if args.group == "restore":
         return service.restore(args.file, **write)
     if args.group == "ns":
         return (
-            service.ns_list(args.domain)
+            service.ns_list(domain)
             if args.action == "list"
-            else service.ns_set(args.domain, servers=args.custom, default=args.default, **write)
+            else service.ns_set(domain, servers=args.custom, default=args.default, **write)
         )
     if args.action == "list":
-        return service.dns_list(args.domain)
+        return service.dns_list(domain)
+    if args.action == "check":
+        return service.dns_check(domain, host=args.host, rtype=args.rtype, resolver=doh_resolver)
     if args.action == "apply":
         return service.dns_edit(
-            args.domain, "apply", zone_file=args.file, email_type=args.email_type, **write
+            domain, "apply", zone_data=zone_data, email_type=args.email_type, **write
         )
+    mxpref = DEFAULT_MXPREF if getattr(args, "mxpref", None) is None else args.mxpref
     return service.dns_edit(
-        args.domain,
+        domain,
         args.action,
         name=args.host,
         rtype=args.type,
         value=args.value,
         ttl=getattr(args, "ttl", 1800),
-        mxpref=getattr(args, "mxpref", 10),
+        mxpref=mxpref,
         email_type=args.email_type,
         **write,
     )
@@ -358,7 +492,14 @@ def render_human(envelope: dict) -> str:
     return json.dumps(data, indent=2, ensure_ascii=False)
 
 
-def main(argv: list[str] | None = None, *, env=None, client_factory=Client) -> int:
+def main(
+    argv: list[str] | None = None,
+    *,
+    env=None,
+    client_factory=Client,
+    stdin: Any = None,
+    doh_resolver=resolve_doh,
+) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     env = os.environ if env is None else env
     secrets = [
@@ -372,7 +513,7 @@ def main(argv: list[str] | None = None, *, env=None, client_factory=Client) -> i
         args = build_parser().parse_args(argv)
         human = getattr(args, "human", False) and not getattr(args, "json", False)
         command = args.group + (" " + args.action if hasattr(args, "action") else "")
-        data = dispatch(args, env, secrets, client_factory)
+        data = dispatch(args, env, secrets, client_factory, stdin=stdin, doh_resolver=doh_resolver)
         warnings = data.pop("warnings", [])
         result = {
             "schema_version": 1,

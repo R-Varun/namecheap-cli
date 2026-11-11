@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
@@ -9,12 +10,41 @@ from typing import Any
 
 from .errors import CliError
 
+MAX_JSON_BYTES = 1024 * 1024
+
 
 def read_json(path: Path) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise CliError("invalid_file", f"Cannot read JSON file: {path}") from exc
+
+
+def read_json_stdin(stream: Any = None) -> Any:
+    source = sys.stdin if stream is None else stream
+    try:
+        raw = source.read(MAX_JSON_BYTES + 1)
+    except (OSError, UnicodeError) as exc:
+        raise CliError("invalid_file", "Cannot read JSON from standard input.") from exc
+    if isinstance(raw, bytes):
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise CliError("invalid_file", "Standard input must be valid UTF-8 JSON.") from exc
+    else:
+        text = raw
+    try:
+        encoded_len = len(text.encode("utf-8"))
+    except UnicodeError as exc:
+        raise CliError("invalid_file", "Standard input must be valid UTF-8 JSON.") from exc
+    if encoded_len > MAX_JSON_BYTES:
+        raise CliError("invalid_file", "Standard input exceeds the 1 MiB JSON size limit.")
+    if not text.strip():
+        raise CliError("invalid_file", "Standard input is empty; expected a zone JSON object.")
+    try:
+        return json.loads(text)
+    except ValueError as exc:
+        raise CliError("invalid_file", "Cannot parse JSON from standard input.") from exc
 
 
 def atomic_json(path: Path, data: Any, *, replace: bool = True) -> None:

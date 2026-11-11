@@ -191,3 +191,95 @@ def test_rate_limit_spacing(monkeypatch):
     api.call("test")
     api.call("test")
     assert sleep.call_args.args[0] == pytest.approx(1.15)
+
+
+@pytest.mark.parametrize(
+    "domain,sld,tld",
+    [
+        ("example.com", "example", "com"),
+        ("example.co.uk", "example", "co.uk"),
+        ("example.com.au", "example", "com.au"),
+        ("bücher.co.uk", "xn--bcher-kva", "co.uk"),
+    ],
+)
+def test_multipart_tld_params(domain, sld, tld):
+    assert Client._params(domain) == {"SLD": sld, "TLD": tld}
+
+
+def test_resolve_doh_types_and_errors():
+    import json as _json
+
+    from namecheap_cli.client import _unescape_txt, resolve_doh
+
+    def fake_opener(payload, *, size_override=None, exc=None):
+        response = Mock()
+        response.__enter__ = Mock(return_value=response)
+        response.__exit__ = Mock(return_value=False)
+        response.read.return_value = (
+            size_override if size_override is not None else _json.dumps(payload).encode("utf-8")
+        )
+        return Mock(side_effect=exc, return_value=response)
+
+    assert resolve_doh(
+        "example.com",
+        "A",
+        opener=fake_opener(
+            {
+                "Status": 0,
+                "Answer": [
+                    {"type": 5, "data": "alias.example.net."},
+                    {"type": 1, "data": "203.0.113.10"},
+                ],
+            }
+        ),
+    ) == ["203.0.113.10"]
+    assert resolve_doh(
+        "example.com",
+        "AAAA",
+        opener=fake_opener({"Status": 0, "Answer": [{"type": 28, "data": "2001:0db8::1"}]}),
+    ) == ["2001:db8::1"]
+    assert resolve_doh(
+        "www.example.com",
+        "CNAME",
+        opener=fake_opener({"Status": 0, "Answer": [{"type": 5, "data": "Target.Example.NET."}]}),
+    ) == ["target.example.net."]
+    assert resolve_doh(
+        "example.com",
+        "MX",
+        opener=fake_opener({"Status": 0, "Answer": [{"type": 15, "data": "10 Mail.Example.NET."}]}),
+    ) == ["10 mail.example.net."]
+    assert resolve_doh(
+        "example.com",
+        "TXT",
+        opener=fake_opener(
+            {
+                "Status": 0,
+                "Answer": [
+                    {"type": 16, "data": '"v=spf1 " "include:_spf.example.net ~all"'},
+                    {"type": 16, "data": '"quote=\\"ok\\" slash=\\\\ oct=\\059"'},
+                ],
+            }
+        ),
+    ) == ['quote="ok" slash=\\ oct=;', "v=spf1 include:_spf.example.net ~all"]
+    assert resolve_doh("missing.example.com", "A", opener=fake_opener({"Status": 3})) == []
+    assert _unescape_txt("plain-unquoted") == "plain-unquoted"
+
+    with pytest.raises(CliError) as err:
+        resolve_doh("example.com", "URL")
+    assert err.value.code == "invalid_record"
+
+    for rtype, bad_opener in (
+        ("A", fake_opener({}, exc=TimeoutError())),
+        ("A", fake_opener({}, size_override=b"x" * 65537)),
+        ("A", fake_opener({}, size_override=b"not-json")),
+        ("A", fake_opener({"Status": "bad"})),
+        ("A", fake_opener({"Status": 2})),
+        ("A", fake_opener({"Status": 0, "Answer": "bad"})),
+        ("A", fake_opener({"Status": 0, "Answer": [{"type": 1, "data": "not-an-ip"}]})),
+        ("AAAA", fake_opener({"Status": 0, "Answer": [{"type": 28, "data": "not-v6"}]})),
+        ("MX", fake_opener({"Status": 0, "Answer": [{"type": 15, "data": "ten mail.example."}]})),
+        ("MX", fake_opener({"Status": 0, "Answer": [{"type": 15, "data": "10"}]})),
+    ):
+        with pytest.raises(CliError) as err:
+            resolve_doh("example.com", rtype, opener=bad_opener)
+        assert err.value.code == "doh_error"

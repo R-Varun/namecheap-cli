@@ -5,8 +5,9 @@ import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
-from .client import Client
+from .client import DOH_TYPES, Client, resolve_doh
 from .config import Config, domain_name
 from .errors import CliError
 from .records import (
@@ -42,6 +43,90 @@ class Service:
             "unsupported_metadata": list(zone.unsupported),
         }
 
+    def dns_check(
+        self,
+        domain: str,
+        *,
+        host: str | None = None,
+        rtype: str | None = None,
+        resolver: Callable[[str, str], list[str]] = resolve_doh,
+    ) -> dict:
+        domain = self.config.require(domain)
+        target_name = relative_name(host, domain) if host is not None else None
+        target_type = None
+        if rtype is not None:
+            target_type = rtype.strip().upper()
+            if target_type not in TYPES:
+                raise CliError("invalid_record", f"Unsupported record type {rtype!r}.")
+        zone = self.client.hosts(domain)
+        selected = [
+            item
+            for item in zone.hosts
+            if (target_name is None or item.name == target_name)
+            and (target_type is None or item.type == target_type)
+        ]
+        grouped: dict[tuple[str, str], list[Host]] = {}
+        for item in selected:
+            grouped.setdefault((item.name, item.type), []).append(item)
+        records = []
+        for name, htype in sorted(grouped):
+            group = grouped[(name, htype)]
+            fqdn = domain if name == "@" else f"{name}.{domain}"
+            if htype in DOH_TYPES:
+                if htype == "MX":
+                    expected = sorted(f"{h.mxpref} {h.address.lower().rstrip('.')}." for h in group)
+                elif htype in {"CNAME", "NS"}:
+                    expected = sorted(h.address.lower().rstrip(".") + "." for h in group)
+                elif htype in {"A", "AAAA"}:
+                    expected = sorted(h.key[2] for h in group)
+                else:
+                    expected = sorted(h.address for h in group)
+                observed = resolver(fqdn, htype)
+                matches = expected == observed
+                records.append(
+                    {
+                        "name": name,
+                        "fqdn": fqdn,
+                        "type": htype,
+                        "expected": expected,
+                        "observed": observed,
+                        "matches": matches,
+                        "status": "propagated" if matches else "pending",
+                    }
+                )
+            else:
+                records.append(
+                    {
+                        "name": name,
+                        "fqdn": fqdn,
+                        "type": htype,
+                        "expected": sorted(h.address for h in group),
+                        "observed": [],
+                        "matches": None,
+                        "status": "synthetic",
+                    }
+                )
+        checked = [r for r in records if r["status"] != "synthetic"]
+        matched = [r for r in checked if r["matches"]]
+        warnings = []
+        if not records:
+            warnings.append("No matching zone records found to check.")
+        elif not checked:
+            warnings.append(
+                "Selected records use provider-synthesized types (ALIAS/URL/MXE); "
+                "public DNS RRsets cannot be compared 1:1."
+            )
+        return {
+            "domain": domain,
+            "resolver": "cloudflare-doh",
+            "propagated": bool(checked) and all(r["matches"] for r in checked),
+            "checked_count": len(checked),
+            "matched_count": len(matched),
+            "synthetic_count": len(records) - len(checked),
+            "records": records,
+            "warnings": warnings,
+        }
+
     def ns_list(self, domain: str) -> dict:
         domain = self.config.require(domain)
         state = self.client.nameservers(domain)
@@ -58,15 +143,18 @@ class Service:
         ttl: int = 1800,
         mxpref: int = 10,
         zone_file: Path | None = None,
+        zone_data: Any = None,
         email_type: str | None = None,
         yes: bool = False,
         if_match: str | None = None,
     ) -> dict:
         domain = self.config.require(domain)
         if action == "apply":
-            if zone_file is None:
-                raise CliError("invalid_file", "A zone file is required.")
-            file_zone = Zone.from_json(domain, read_json(zone_file))
+            if zone_data is None:
+                if zone_file is None:
+                    raise CliError("invalid_file", "A zone file is required.")
+                zone_data = read_json(zone_file)
+            file_zone = Zone.from_json(domain, zone_data)
         else:
             file_zone = None
         # Validate supplied values before network access.
@@ -281,7 +369,11 @@ class Service:
                 "verified": False,
                 "warnings": warnings,
             }
-            if not changes or not yes:
+            if not changes:
+                if yes:
+                    return {**plan, "verified": True, "outcome": "noop"}
+                return plan
+            if not yes:
                 return plan
             token = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex
             backup = self.state_dir / "backups" / domain / f"{token}.json"
@@ -311,7 +403,24 @@ class Service:
             entry = {**saved, "status": "prepared", "recovery": recovery}
             atomic_json(journal, entry, replace=False)
             # A best-effort external-writer check. The API has no atomic CAS.
-            fresh = read(domain)
+            try:
+                fresh = read(domain)
+            except (Exception, KeyboardInterrupt) as exc:
+                entry["status"] = "aborted"
+                try:
+                    atomic_json(journal, entry)
+                except OSError:
+                    pass
+                if isinstance(exc, KeyboardInterrupt):
+                    raise CliError(
+                        "interrupted",
+                        "Interrupted before submitting write. No write was sent.",
+                        exit_code=130,
+                        details={"recovery": recovery},
+                    ) from None
+                if isinstance(exc, CliError):
+                    exc.details = {**exc.details, "recovery": recovery}
+                raise
             if canonical(fresh) != canonical(old):
                 entry["status"] = "conflict"
                 atomic_json(journal, entry)
@@ -323,8 +432,10 @@ class Service:
                 )
             entry["status"] = "submitted"
             atomic_json(journal, entry)
+            submitted = False
             try:
                 write(domain, new)
+                submitted = True
                 actual = read(domain)
                 if not matches(new, actual):
                     raise CliError(
@@ -336,6 +447,12 @@ class Service:
                 atomic_json(journal, entry)
             except (Exception, KeyboardInterrupt) as exc:
                 interrupted = isinstance(exc, KeyboardInterrupt)
+                rejected = (
+                    not submitted
+                    and isinstance(exc, CliError)
+                    and exc.code in {"provider_error", "write_rejected"}
+                )
+                outcome = "rejected" if rejected else "unknown"
                 reason = (
                     exc.to_json()
                     if isinstance(exc, CliError)
@@ -351,7 +468,7 @@ class Service:
                     "A write was submitted but could not be verified. "
                     "Inspect current state before retrying or restoring.",
                     exit_code=130 if interrupted else 4,
-                    details={"outcome": "unknown", "cause": reason, "recovery": recovery},
+                    details={"outcome": outcome, "cause": reason, "recovery": recovery},
                 ) from None
             return {
                 **plan,

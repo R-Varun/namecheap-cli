@@ -1,0 +1,36 @@
+# Namecheap CLI (v__CLI_VERSION__)
+
+> Zero-dependency Python 3.11+ CLI (`namecheap`) for AI agents and scripts to inspect, preview, apply, verify, and restore Namecheap BasicDNS records and nameserver delegation with versioned JSON envelopes.
+
+## Quick Facts
+
+- Package: `namecheap-agent-cli` (command: `namecheap`, version `__CLI_VERSION__`)
+- Repository: https://github.com/R-Varun/namecheap-cli
+- Install: `uv tool install 'git+https://github.com/R-Varun/namecheap-cli'`
+- Zero-install schema discovery: `uvx --from 'git+https://github.com/R-Varun/namecheap-cli' namecheap schema`
+- Output contract: Single JSON document on `stdout` (`schema_version: 1`) for every normal execution and error; `--human` for terse terminal text.
+- Write safety: Every mutation (`dns add`, `dns set`, `dns remove`, `dns apply`, `ns set`, `restore`) is a dry-run preview unless `--yes --if-match <STATE_HASH>` is passed. Writes take a local domain lock, save a `0600` backup and journal before calling `setHosts`, verify every record/TTL/MXpref/email mode afterward, and never auto-retry writes.
+
+## Machine-Readable & Agent Resources
+
+- [Live Command & Zone Schema (JSON)](https://r-varun.github.io/namecheap-cli/schema.json): Exact output of `namecheap schema` (all 18 commands, arguments, conditional rules, zone schema, and error code catalogue).
+- [Installable Agent Skill (`SKILL.md`)](https://raw.githubusercontent.com/R-Varun/namecheap-cli/main/skills/namecheap-dns/SKILL.md): Portable skill instructions for Claude Code, Codex, Cursor, and OpenClaw/Hermes agents.
+- [Agent Integration Guide](https://github.com/R-Varun/namecheap-cli/blob/main/docs/agents.md): Subprocess patterns, optimistic locking workflow, stdin batch apply, and error recovery table.
+- [Command Contract Reference](https://github.com/R-Varun/namecheap-cli/blob/main/docs/cli.md): All 18 commands, global flags, and exit codes (`0`, `1`, `2`, `3`, `4`, `66`, `130`).
+- [Write Safety Model](https://github.com/R-Varun/namecheap-cli/blob/main/docs/safety.md): Whole-zone replacement hazards, local locks, email routing preservation, and recovery journals.
+- [Configuration & Credentials](https://github.com/R-Varun/namecheap-cli/blob/main/docs/configuration.md): Domain allowlists, `NAMECHEAP_API_USER` / `NAMECHEAP_API_KEY`, sandbox isolation, and `NAMECHEAP_CLIENT_IP`.
+
+## Command Summary
+
+- `namecheap schema` — Emit full command, argument, zone, and error-code schema JSON.
+- `namecheap config init --domain <domain>` / `config allow <domain>` / `config disallow <domain>` / `config show` — Manage the local domain allowlist.
+- `namecheap auth setup --username <user>` — Prompt securely for an API key and store in `0600` local file.
+- `namecheap doctor` — Verify configuration, credentials, client IPv4, and read-only API connectivity.
+- `namecheap domains list [--all]` / `domains check <domains...>` — List account domains or check availability.
+- `namecheap dns list <domain>` — Read BasicDNS zone records, `email_type`, and `state_hash`.
+- `namecheap dns set|add <domain> <host> <type> <value> [--ttl N] [--mxpref N] [--email-type MODE] [--yes --if-match HASH]` — Preview or apply host record edits.
+- `namecheap dns remove <domain> <host> <type> [--value VAL] [--email-type MODE] [--yes --if-match HASH]` — Preview or remove matching host records.
+- `namecheap dns apply <domain> <file-or--> [--yes --if-match HASH]` — Preview or apply a complete zone JSON file (or `-` for `stdin`).
+- `namecheap dns check <domain> [--host HOST] [--type TYPE]` — Verify public DNS propagation via Cloudflare DNS-over-HTTPS against Namecheap's stored zone.
+- `namecheap ns list <domain>` / `ns set <domain> (--custom NS... | --default) [--yes --if-match HASH]` — Inspect or update nameserver delegation.
+- `namecheap restore <backup.json> [--yes --if-match HASH]` — Preview or restore a pre-write DNS or nameserver backup.

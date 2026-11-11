@@ -1,6 +1,7 @@
 """Small XML API client. Fixed HTTPS endpoints; no automatic mutation retries."""
 
 import ipaddress
+import json
 import time
 import urllib.error
 import urllib.parse
@@ -18,6 +19,8 @@ ENDPOINTS = {
     "production": "https://api.namecheap.com/xml.response",
     "sandbox": "https://api.sandbox.namecheap.com/xml.response",
 }
+DOH_ENDPOINT = "https://cloudflare-dns.com/dns-query"
+DOH_TYPES = {"A": 1, "NS": 2, "CNAME": 5, "MX": 15, "TXT": 16, "AAAA": 28}
 TIMEOUT = 30
 MAX_RESPONSE = 4 * 1024 * 1024
 HINTS = {
@@ -79,6 +82,119 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
             "The API tried to redirect the request; no credential was forwarded.",
             exit_code=1,
         )
+
+
+def _unescape_txt(raw: str) -> str:
+    text = raw.strip()
+    if not text.startswith('"'):
+        return text
+    out = bytearray()
+    i, n = 0, len(text)
+    while i < n:
+        while i < n and text[i].isspace():
+            i += 1
+        if i >= n:
+            break
+        if text[i] != '"':
+            return raw
+        i += 1
+        while i < n and text[i] != '"':
+            if text[i] == "\\" and i + 1 < n:
+                if i + 3 < n and text[i + 1 : i + 4].isdigit():
+                    val = int(text[i + 1 : i + 4])
+                    if 0 <= val <= 255:
+                        out.append(val)
+                        i += 4
+                        continue
+                out.extend(text[i + 1].encode("utf-8"))
+                i += 2
+            else:
+                out.extend(text[i].encode("utf-8"))
+                i += 1
+        if i >= n or text[i] != '"':
+            return raw
+        i += 1
+    return out.decode("utf-8", "replace")
+
+
+def resolve_doh(qname: str, rtype: str, *, opener: Callable | None = None) -> list[str]:
+    rtype = rtype.upper()
+    if rtype not in DOH_TYPES:
+        raise CliError("invalid_record", f"Public DNS check does not support type {rtype!r}.")
+    query = urllib.parse.urlencode({"name": qname.rstrip("."), "type": rtype})
+    request = urllib.request.Request(
+        f"{DOH_ENDPOINT}?{query}",
+        headers={
+            "Accept": "application/dns-json",
+            "User-Agent": f"namecheap-cli/{__version__}",
+        },
+    )
+    open_fn = opener or urllib.request.build_opener(NoRedirect).open
+    try:
+        with open_fn(request, timeout=TIMEOUT) as response:
+            raw = response.read(65537)
+    except CliError:
+        raise
+    except (OSError, HTTPException) as exc:
+        raise CliError(
+            "doh_error",
+            "Could not query the public DNS-over-HTTPS resolver.",
+            exit_code=1,
+            details={"exception": type(exc).__name__},
+            retryable=True,
+        ) from None
+    if len(raw) > 65536:
+        raise CliError("doh_error", "Public DNS response exceeded size limit.", exit_code=1)
+    try:
+        payload = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise CliError(
+            "doh_error", "Public DNS resolver returned invalid JSON.", exit_code=1
+        ) from exc
+    if not isinstance(payload, dict) or not isinstance(payload.get("Status"), int):
+        raise CliError("doh_error", "Unexpected public DNS response structure.", exit_code=1)
+    status = payload["Status"]
+    if status == 3:
+        return []
+    if status != 0:
+        raise CliError(
+            "doh_error",
+            f"Public DNS resolver returned RCODE {status}.",
+            exit_code=1,
+            retryable=True,
+        )
+    answers = payload.get("Answer") or []
+    if not isinstance(answers, list):
+        raise CliError("doh_error", "Unexpected public DNS Answer list.", exit_code=1)
+    code = DOH_TYPES[rtype]
+    values: list[str] = []
+    for item in answers:
+        if not isinstance(item, dict) or item.get("type") != code:
+            continue
+        data = item.get("data")
+        if not isinstance(data, str):
+            continue
+        try:
+            if rtype == "A":
+                values.append(str(ipaddress.IPv4Address(data.strip())))
+            elif rtype == "AAAA":
+                values.append(str(ipaddress.IPv6Address(data.strip())))
+            elif rtype in {"CNAME", "NS"}:
+                values.append(data.strip().lower().rstrip(".") + ".")
+            elif rtype == "MX":
+                parts = data.strip().split(None, 1)
+                if len(parts) != 2 or not parts[1].strip().rstrip("."):
+                    raise ValueError("malformed MX answer")
+                values.append(f"{int(parts[0])} {parts[1].strip().lower().rstrip('.')}.")
+            elif rtype == "TXT":
+                values.append(_unescape_txt(data))
+        except ValueError as exc:
+            raise CliError(
+                "doh_error",
+                f"Public DNS resolver returned malformed {rtype} answer data.",
+                exit_code=1,
+            ) from exc
+    return sorted(values)
 
 
 def detect_ipv4(profile: str) -> str:

@@ -156,7 +156,96 @@ def test_interrupt_during_submission_keeps_recovery(service, monkeypatch):
 
 def test_no_change_does_not_write(service, api):
     result = service.dns_edit(DOMAIN, "add", name="www", rtype="CNAME", value="parking.example.net")
-    assert not result["changed"] and not api.writes
+    assert not result["changed"] and result["dry_run"] and not result["verified"] and not api.writes
+    confirmed = service.dns_edit(
+        DOMAIN,
+        "add",
+        name="www",
+        rtype="CNAME",
+        value="parking.example.net",
+        yes=True,
+        if_match=result["state_hash"],
+    )
+    assert (
+        not confirmed["changed"]
+        and not confirmed["dry_run"]
+        and confirmed["verified"]
+        and confirmed["outcome"] == "noop"
+        and not api.writes
+    )
+
+
+def test_pre_submission_reread_failure_aborts_journal_and_includes_recovery(service, api):
+    plan = preview(service)
+    reads = 0
+
+    def hook(form):
+        nonlocal reads
+        if form["Command"].endswith("getHosts"):
+            reads += 1
+            if reads == 2:
+                return (
+                    '<ApiResponse Status="ERROR">'
+                    '<Error Number="500">Read failed</Error></ApiResponse>'
+                )
+
+    api.hook = hook
+    with pytest.raises(CliError) as error:
+        preview(service, yes=True, if_match=plan["state_hash"])
+    assert error.value.code == "provider_error" and not api.writes
+    recovery = error.value.details["recovery"]
+    assert json.loads(Path(recovery["journal_file"]).read_text())["status"] == "aborted"
+
+
+def test_provider_rejection_marks_outcome_rejected(service, api):
+    plan = preview(service)
+
+    def hook(form):
+        if form["Command"].endswith("setHosts"):
+            return (
+                '<ApiResponse Status="ERROR"><Error Number="2019166">Rejected</Error></ApiResponse>'
+            )
+
+    api.hook = hook
+    with pytest.raises(CliError) as error:
+        preview(service, yes=True, if_match=plan["state_hash"])
+    assert error.value.exit_code == 4 and error.value.details["outcome"] == "rejected"
+
+
+def test_service_dns_check_modes(service, api):
+    api.zone = Zone(
+        DOMAIN,
+        (
+            Host("@", "A", "192.0.2.10"),
+            Host("@", "MX", "mail.example.net.", mxpref=10),
+            Host("www", "CNAME", "example.com."),
+            Host("txt", "TXT", "v=spf1 -all"),
+            Host("redir", "URL", "https://www.example.com/"),
+        ),
+        "MX",
+    )
+    answers = {
+        ("example.com", "A"): ["192.0.2.10"],
+        ("example.com", "MX"): ["10 mail.example.net."],
+        ("www.example.com", "CNAME"): ["example.com."],
+        ("txt.example.com", "TXT"): ["v=spf1 -all"],
+    }
+    full = service.dns_check(DOMAIN, resolver=lambda q, t: answers.get((q, t), []))
+    assert (
+        full["propagated"] is True and full["checked_count"] == 4 and full["synthetic_count"] == 1
+    )
+
+    pending = service.dns_check(DOMAIN, host="@", rtype="A", resolver=lambda q, t: ["198.51.100.9"])
+    assert pending["propagated"] is False and pending["records"][0]["status"] == "pending"
+
+    synth = service.dns_check(DOMAIN, host="redir", resolver=lambda q, t: [])
+    assert synth["synthetic_count"] == 1 and synth["warnings"]
+
+    empty = service.dns_check(DOMAIN, host="absent", resolver=lambda q, t: [])
+    assert empty["propagated"] is False and empty["warnings"]
+
+    with pytest.raises(CliError):
+        service.dns_check(DOMAIN, rtype="CAA")
 
 
 @pytest.mark.parametrize(
@@ -281,3 +370,46 @@ except CliError as exc:
         DOMAIN, "set", name="www", value="192.0.2.20", yes=True, if_match=next_plan["state_hash"]
     )
     assert {h.address for h in api.zone.hosts} == {"192.0.2.10", "192.0.2.20"}
+
+
+def test_synthetic_only_dns_check_and_aborted_interrupt_and_write_rejected(
+    service, api, monkeypatch
+):
+    synth = service.dns_check(DOMAIN, host="@", resolver=lambda fqdn, rtype: [])
+    assert synth["checked_count"] == 0 and synth["synthetic_count"] == 1
+    assert synth["propagated"] is False and synth["warnings"]
+
+    plan = preview(service)
+    real_hosts = service.client.hosts
+    reads = 0
+
+    def interrupt_reread(domain):
+        nonlocal reads
+        reads += 1
+        if reads == 2:
+            raise KeyboardInterrupt
+        return real_hosts(domain)
+
+    monkeypatch.setattr(service.client, "hosts", interrupt_reread)
+    with pytest.raises(CliError) as interrupted:
+        preview(service, yes=True, if_match=plan["state_hash"])
+    assert interrupted.value.code == "interrupted" and interrupted.value.exit_code == 130
+    assert not api.writes
+    rec = interrupted.value.details["recovery"]
+    assert json.loads(Path(rec["journal_file"]).read_text())["status"] == "aborted"
+    monkeypatch.setattr(service.client, "hosts", real_hosts)
+
+    from conftest import xml
+
+    def reject_write(form):
+        if form["Command"].endswith("setHosts"):
+            return xml(
+                form["Command"],
+                '<DomainDNSSetHostsResult Domain="example.com" IsSuccess="false"/>',
+            )
+
+    api.hook = reject_write
+    with pytest.raises(CliError) as rejected:
+        preview(service, yes=True, if_match=plan["state_hash"])
+    assert rejected.value.code == "write_unverified"
+    assert rejected.value.details["outcome"] == "rejected"

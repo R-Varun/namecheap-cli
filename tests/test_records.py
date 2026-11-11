@@ -46,8 +46,14 @@ def test_invalid_domains(value):
     [
         ("A", "invalid"),
         ("AAAA", "192.0.2.1"),
+        ("AAAA", "fe80::1%eth0"),
         ("CNAME", "localhost"),
         ("URL", "https:///bad"),
+        ("URL", "http://user:pw@example.com/"),
+        ("URL", "http://example.com:99999/"),
+        ("URL", "http://example.com:0/"),
+        ("URL", "http://localhost/"),
+        ("URL", "https://example.com/has space"),
         ("CAA", "0 issue example.com"),
     ],
 )
@@ -70,11 +76,13 @@ def test_names_and_targets():
         "ttl": 1800,
     }
     assert make_host(D, "_acme-challenge", "TXT", "a").name == "_acme-challenge"
+    assert make_host(D, "_25._tcp.mail", "TXT", "a").name == "_25._tcp.mail"
+    assert make_host(D, "*.sub", "A", "192.0.2.1").name == "*.sub"
     assert make_host(D, "*", "A", "192.0.2.1").name == "*"
-    with pytest.raises(CliError):
-        make_host(D, "bad name", "TXT", "a")
-    with pytest.raises(CliError):
-        make_host(D, "a" * 64, "TXT", "a")
+    assert make_host(D, "@", "URL301", "https://203.0.113.10:8443/ok").type == "URL301"
+    for bad_host in ("bad name", "a" * 64, "-bad", "bad-", "sub.*", "_"):
+        with pytest.raises(CliError):
+            make_host(D, bad_host, "TXT", "a")
 
 
 @given(
@@ -101,6 +109,7 @@ def test_txt_whitespace_regression():
         {},
         {"domain": D, "hosts": [{}]},
         {"domain": D, "hosts": [{"name": "@", "type": "A", "address": "192.0.2.1", "ttl": "bad"}]},
+        {"domain": D, "hosts": [{"name": "@", "type": "TXT", "address": "v", "mxpref": 10}]},
         {"domain": D, "hosts": [], "typo": True},
         {"domain": D, "hosts": [], "email_type": "NONE"},
     ],

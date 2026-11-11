@@ -3,7 +3,14 @@ name: Project page
 on:
   push:
     branches: [main]
-    paths: ['site/**', 'assets/**', 'scripts/build_site.py', '.github/workflows/pages.yml']
+    paths:
+      - 'site/**'
+      - 'assets/**'
+      - 'docs/schema.json'
+      - 'pyproject.toml'
+      - 'src/namecheap_cli/__init__.py'
+      - 'scripts/build_site.py'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -16,6 +23,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -29,6 +37,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       pages: write
       id-token: write

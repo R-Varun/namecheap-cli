@@ -129,3 +129,22 @@ def test_locks_release_after_exception(tmp_path):
         raise RuntimeError("synthetic")
     with domain_lock(path):
         assert path.exists()
+
+
+def test_read_json_stdin_cases():
+    import io
+
+    from namecheap_cli.storage import MAX_JSON_BYTES, read_json_stdin
+
+    assert read_json_stdin(io.StringIO('{"ok": true}')) == {"ok": True}
+    assert read_json_stdin(io.BytesIO(b'{"ok": 1}')) == {"ok": 1}
+    for bad_stream in (
+        io.StringIO("   "),
+        io.StringIO("{bad"),
+        io.StringIO('{"a":"\udcff"}'),
+        io.StringIO("x" * (MAX_JSON_BYTES + 10)),
+        io.BytesIO(b"\xff\xfe"),
+    ):
+        with pytest.raises(CliError) as err:
+            read_json_stdin(bad_stream)
+        assert err.value.code == "invalid_file"

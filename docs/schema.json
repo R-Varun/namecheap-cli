@@ -3,7 +3,7 @@
   "ok": true,
   "command": "schema",
   "data": {
-    "cli_version": "0.1.0",
+    "cli_version": "0.2.0",
     "output_schema_version": 1,
     "commands": [
       {
@@ -16,6 +16,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -26,6 +27,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -36,6 +38,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -46,6 +49,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -56,9 +60,19 @@
               "--domain"
             ],
             "required": false,
+            "repeatable": true,
             "help": "allow a domain (repeatable)",
             "nargs": null,
             "type": "string"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
@@ -72,6 +86,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -82,6 +97,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -92,6 +108,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -102,6 +119,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -110,9 +128,87 @@
             "name": "domains",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": "+",
             "type": "string"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
+          }
+        ]
+      },
+      {
+        "command": "config disallow",
+        "description": "remove one or more domains from the local allowlist",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domains",
+            "flags": [],
+            "required": true,
+            "repeatable": false,
+            "help": "",
+            "nargs": "+",
+            "type": "string"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
@@ -126,6 +222,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -136,6 +233,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -146,6 +244,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -156,9 +255,19 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
@@ -172,6 +281,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -182,6 +292,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -192,6 +303,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -202,6 +314,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -212,6 +325,7 @@
               "--username"
             ],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
@@ -222,9 +336,19 @@
               "--force"
             ],
             "required": false,
+            "repeatable": false,
             "help": "",
             "nargs": 0,
             "type": "boolean"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
@@ -238,6 +362,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -248,6 +373,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -258,6 +384,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -268,15 +395,25 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
       {
         "command": "schema",
-        "description": "describe commands, JSON output, and zone-file schemas",
+        "description": "describe commands, JSON output, error codes, and zone-file schemas",
         "arguments": [
           {
             "name": "config",
@@ -284,6 +421,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -294,6 +432,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -304,6 +443,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -314,9 +454,19 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
@@ -330,6 +480,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -340,6 +491,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -350,6 +502,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -360,6 +513,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -370,9 +524,19 @@
               "--all"
             ],
             "required": false,
+            "repeatable": false,
             "help": "explicitly include domains outside the allowlist",
             "nargs": 0,
             "type": "boolean"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
@@ -386,6 +550,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -396,6 +561,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -406,6 +572,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -416,6 +583,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -424,9 +592,19 @@
             "name": "names",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": "+",
             "type": "string"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
@@ -440,6 +618,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -450,6 +629,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -460,6 +640,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -470,6 +651,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -478,9 +660,122 @@
             "name": "domain",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
+          }
+        ]
+      },
+      {
+        "command": "dns check",
+        "description": "compare Namecheap zone records against live public DNS",
+        "arguments": [
+          {
+            "name": "config",
+            "flags": [
+              "--config"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "configuration JSON path",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "sandbox",
+            "flags": [
+              "--sandbox"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "use separate Namecheap sandbox credentials and state",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "json",
+            "flags": [
+              "--json"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "JSON output (default)",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "human",
+            "flags": [
+              "--human"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "short readable output",
+            "nargs": 0,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "flags": [],
+            "required": true,
+            "repeatable": false,
+            "help": "",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "host",
+            "flags": [
+              "--host"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "optional host filter (@, relative name, or FQDN)",
+            "nargs": null,
+            "type": "string"
+          },
+          {
+            "name": "rtype",
+            "flags": [
+              "--type"
+            ],
+            "required": false,
+            "repeatable": false,
+            "help": "record type filter",
+            "nargs": null,
+            "type": "string",
+            "choices": [
+              "A",
+              "AAAA",
+              "ALIAS",
+              "CNAME",
+              "MX",
+              "MXE",
+              "NS",
+              "TXT",
+              "URL",
+              "URL301",
+              "FRAME"
+            ]
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
@@ -494,6 +789,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -504,6 +800,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -514,6 +811,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -524,6 +822,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -532,6 +831,7 @@
             "name": "domain",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
@@ -540,6 +840,7 @@
             "name": "host",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "@, a relative name, or a name within the domain",
             "nargs": null,
             "type": "string"
@@ -548,6 +849,7 @@
             "name": "type",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string",
@@ -569,6 +871,7 @@
             "name": "value",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
@@ -579,6 +882,7 @@
               "--ttl"
             ],
             "required": false,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "integer"
@@ -589,7 +893,8 @@
               "--mxpref"
             ],
             "required": false,
-            "help": "",
+            "repeatable": false,
+            "help": "MX priority (MX records only)",
             "nargs": null,
             "type": "integer"
           },
@@ -599,6 +904,7 @@
               "--yes"
             ],
             "required": false,
+            "repeatable": false,
             "help": "apply after reviewing the dry run",
             "nargs": 0,
             "type": "boolean"
@@ -609,6 +915,7 @@
               "--if-match"
             ],
             "required": false,
+            "repeatable": false,
             "help": "state_hash returned by the preview; required with --yes",
             "nargs": null,
             "type": "string"
@@ -619,6 +926,7 @@
               "--email-type"
             ],
             "required": false,
+            "repeatable": false,
             "help": "explicit email-mode change; omitted means preserve",
             "nargs": null,
             "type": "string",
@@ -627,6 +935,15 @@
               "MXE",
               "FWD",
               "OX"
+            ]
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
             ]
           }
         ]
@@ -641,6 +958,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -651,6 +969,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -661,6 +980,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -671,6 +991,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -679,6 +1000,7 @@
             "name": "domain",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
@@ -687,6 +1009,7 @@
             "name": "host",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "@, a relative name, or a name within the domain",
             "nargs": null,
             "type": "string"
@@ -695,6 +1018,7 @@
             "name": "type",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string",
@@ -716,6 +1040,7 @@
             "name": "value",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
@@ -726,6 +1051,7 @@
               "--ttl"
             ],
             "required": false,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "integer"
@@ -736,7 +1062,8 @@
               "--mxpref"
             ],
             "required": false,
-            "help": "",
+            "repeatable": false,
+            "help": "MX priority (MX records only)",
             "nargs": null,
             "type": "integer"
           },
@@ -746,6 +1073,7 @@
               "--yes"
             ],
             "required": false,
+            "repeatable": false,
             "help": "apply after reviewing the dry run",
             "nargs": 0,
             "type": "boolean"
@@ -756,6 +1084,7 @@
               "--if-match"
             ],
             "required": false,
+            "repeatable": false,
             "help": "state_hash returned by the preview; required with --yes",
             "nargs": null,
             "type": "string"
@@ -766,6 +1095,7 @@
               "--email-type"
             ],
             "required": false,
+            "repeatable": false,
             "help": "explicit email-mode change; omitted means preserve",
             "nargs": null,
             "type": "string",
@@ -774,6 +1104,15 @@
               "MXE",
               "FWD",
               "OX"
+            ]
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
             ]
           }
         ]
@@ -788,6 +1127,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -798,6 +1138,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -808,6 +1149,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -818,6 +1160,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -826,6 +1169,7 @@
             "name": "domain",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
@@ -834,6 +1178,7 @@
             "name": "host",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "@, a relative name, or a name within the domain",
             "nargs": null,
             "type": "string"
@@ -842,6 +1187,7 @@
             "name": "type",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string",
@@ -865,6 +1211,7 @@
               "--value"
             ],
             "required": false,
+            "repeatable": false,
             "help": "match one value; omitted removes all of this type at the host",
             "nargs": null,
             "type": "string"
@@ -875,6 +1222,7 @@
               "--yes"
             ],
             "required": false,
+            "repeatable": false,
             "help": "apply after reviewing the dry run",
             "nargs": 0,
             "type": "boolean"
@@ -885,6 +1233,7 @@
               "--if-match"
             ],
             "required": false,
+            "repeatable": false,
             "help": "state_hash returned by the preview; required with --yes",
             "nargs": null,
             "type": "string"
@@ -895,6 +1244,7 @@
               "--email-type"
             ],
             "required": false,
+            "repeatable": false,
             "help": "explicit email-mode change; omitted means preserve",
             "nargs": null,
             "type": "string",
@@ -905,11 +1255,20 @@
               "OX"
             ]
           }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
+          }
         ]
       },
       {
         "command": "dns apply",
-        "description": "replace the whole zone from a zone JSON file",
+        "description": "replace the whole zone from a zone JSON file or '-' for stdin",
         "arguments": [
           {
             "name": "config",
@@ -917,6 +1276,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -927,6 +1287,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -937,6 +1298,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -947,6 +1309,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -955,6 +1318,7 @@
             "name": "domain",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
@@ -963,7 +1327,8 @@
             "name": "file",
             "flags": [],
             "required": true,
-            "help": "",
+            "repeatable": false,
+            "help": "path to zone JSON file, or '-' to read from standard input",
             "nargs": null,
             "type": "string"
           },
@@ -973,6 +1338,7 @@
               "--yes"
             ],
             "required": false,
+            "repeatable": false,
             "help": "apply after reviewing the dry run",
             "nargs": 0,
             "type": "boolean"
@@ -983,6 +1349,7 @@
               "--if-match"
             ],
             "required": false,
+            "repeatable": false,
             "help": "state_hash returned by the preview; required with --yes",
             "nargs": null,
             "type": "string"
@@ -993,6 +1360,7 @@
               "--email-type"
             ],
             "required": false,
+            "repeatable": false,
             "help": "explicit email-mode change; omitted means preserve",
             "nargs": null,
             "type": "string",
@@ -1001,6 +1369,15 @@
               "MXE",
               "FWD",
               "OX"
+            ]
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
             ]
           }
         ]
@@ -1015,6 +1392,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -1025,6 +1403,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -1035,6 +1414,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -1045,6 +1425,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -1053,9 +1434,19 @@
             "name": "domain",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       },
@@ -1069,6 +1460,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -1079,6 +1471,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -1089,6 +1482,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -1099,6 +1493,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -1107,6 +1502,7 @@
             "name": "domain",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
@@ -1117,6 +1513,7 @@
               "--custom"
             ],
             "required": false,
+            "repeatable": false,
             "help": "",
             "nargs": "+",
             "type": "string"
@@ -1127,6 +1524,7 @@
               "--default"
             ],
             "required": false,
+            "repeatable": false,
             "help": "",
             "nargs": 0,
             "type": "boolean"
@@ -1137,6 +1535,7 @@
               "--yes"
             ],
             "required": false,
+            "repeatable": false,
             "help": "apply after reviewing the dry run",
             "nargs": 0,
             "type": "boolean"
@@ -1147,9 +1546,26 @@
               "--if-match"
             ],
             "required": false,
+            "repeatable": false,
             "help": "state_hash returned by the preview; required with --yes",
             "nargs": null,
             "type": "string"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
+          },
+          {
+            "required": true,
+            "flags": [
+              "--custom",
+              "--default"
+            ]
           }
         ]
       },
@@ -1163,6 +1579,7 @@
               "--config"
             ],
             "required": false,
+            "repeatable": false,
             "help": "configuration JSON path",
             "nargs": null,
             "type": "string"
@@ -1173,6 +1590,7 @@
               "--sandbox"
             ],
             "required": false,
+            "repeatable": false,
             "help": "use separate Namecheap sandbox credentials and state",
             "nargs": 0,
             "type": "boolean"
@@ -1183,6 +1601,7 @@
               "--json"
             ],
             "required": false,
+            "repeatable": false,
             "help": "JSON output (default)",
             "nargs": 0,
             "type": "boolean"
@@ -1193,6 +1612,7 @@
               "--human"
             ],
             "required": false,
+            "repeatable": false,
             "help": "short readable output",
             "nargs": 0,
             "type": "boolean"
@@ -1201,6 +1621,7 @@
             "name": "file",
             "flags": [],
             "required": true,
+            "repeatable": false,
             "help": "",
             "nargs": null,
             "type": "string"
@@ -1211,6 +1632,7 @@
               "--yes"
             ],
             "required": false,
+            "repeatable": false,
             "help": "apply after reviewing the dry run",
             "nargs": 0,
             "type": "boolean"
@@ -1221,9 +1643,19 @@
               "--if-match"
             ],
             "required": false,
+            "repeatable": false,
             "help": "state_hash returned by the preview; required with --yes",
             "nargs": null,
             "type": "string"
+          }
+        ],
+        "mutually_exclusive_groups": [
+          {
+            "required": false,
+            "flags": [
+              "--json",
+              "--human"
+            ]
           }
         ]
       }
@@ -1369,9 +1801,187 @@
                 "minimum": 0,
                 "maximum": 65535
               }
-            }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "not": {
+                    "properties": {
+                      "type": {
+                        "const": "MX"
+                      }
+                    }
+                  }
+                },
+                "then": {
+                  "not": {
+                    "required": [
+                      "mxpref"
+                    ]
+                  }
+                }
+              }
+            ]
           }
         }
+      }
+    },
+    "error_codes": {
+      "usage": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "config_missing": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_config": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_domain": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_record": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_nameservers": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_file": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_backup": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_state_hash": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "preview_required": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "file_exists": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "unsafe_file": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "local_io_error": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "ipv4_required": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "terminal_required": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_username": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_key": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "unsafe_credentials": {
+        "exit_code": 2,
+        "retryable": false
+      },
+      "invalid_credentials": {
+        "exit_code": 66,
+        "retryable": false
+      },
+      "credentials_missing": {
+        "exit_code": 66,
+        "retryable": false
+      },
+      "credentials_incomplete": {
+        "exit_code": 66,
+        "retryable": false
+      },
+      "out_of_scope": {
+        "exit_code": 3,
+        "retryable": false
+      },
+      "external_dns": {
+        "exit_code": 3,
+        "retryable": false
+      },
+      "unsupported_metadata": {
+        "exit_code": 3,
+        "retryable": false
+      },
+      "unsupported_record": {
+        "exit_code": 3,
+        "retryable": false
+      },
+      "email_mode_unknown": {
+        "exit_code": 3,
+        "retryable": false
+      },
+      "stale_state": {
+        "exit_code": 3,
+        "retryable": false
+      },
+      "busy": {
+        "exit_code": 3,
+        "retryable": true
+      },
+      "ip_detection_failed": {
+        "exit_code": 1,
+        "retryable": true
+      },
+      "network_error": {
+        "exit_code": 1,
+        "retryable": true
+      },
+      "http_error": {
+        "exit_code": 1,
+        "retryable": true
+      },
+      "doh_error": {
+        "exit_code": 1,
+        "retryable": true
+      },
+      "provider_error": {
+        "exit_code": 1,
+        "retryable": false
+      },
+      "availability_failed": {
+        "exit_code": 1,
+        "retryable": false
+      },
+      "invalid_response": {
+        "exit_code": 1,
+        "retryable": false
+      },
+      "redirect_refused": {
+        "exit_code": 1,
+        "retryable": false
+      },
+      "write_rejected": {
+        "exit_code": 1,
+        "retryable": false
+      },
+      "write_unverified": {
+        "exit_code": 4,
+        "retryable": false
+      },
+      "interrupted": {
+        "exit_code": 130,
+        "retryable": false
       }
     },
     "exit_codes": {

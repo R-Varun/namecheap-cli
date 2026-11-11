@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security Vulnerability
+    url: https://github.com/R-Varun/namecheap-cli/security/advisories/new
+    about: Report a security issue privately via GitHub Security Advisories
+  - name: Documentation & Command Schema
+    url: https://r-varun.github.io/namecheap-cli/
+    about: Read the CLI guide, safety model, and machine-readable schema

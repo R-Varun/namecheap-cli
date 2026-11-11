@@ -1,18 +1,32 @@
 # Contributing
 
-Small, tested changes are welcome. Start with an issue for a new provider
-operation or a change to write behavior.
+Focused, well-tested pull requests are welcome. Open an issue first if you want
+to propose a new provider command or alter the write-safety contract.
 
-Use `uv sync --extra dev`, then run the test, lint, format, and build commands
-in the README. Tests must work without real credentials or internet access.
-Test failure paths. If you change the command contract, update its docs and
-the generated schema check together.
+## Local Workflow
 
-Do not add a raw-API escape hatch, automatic write retries, credentials in
-command-line flags, or assumptions about omitted provider fields. Keep
-provider-backed evidence separate from fake API tests. A test double proves
-local behavior; it does not prove the live provider's semantics.
+```sh
+uv sync --extra dev
+uv run pytest --cov=namecheap_cli --cov-report=term-missing
+uv run ruff check .
+uv run ruff format --check .
+uv build && uv run python scripts/check_distribution.py
+uv run python scripts/build_site.py
+```
 
-Use reserved example domains and documentation IP ranges. Do not submit account
-data, keys, backups, or customer DNS snapshots. Keep prose short and say what
-changed and how you checked it.
+- Keep runtime dependencies at zero (`Python 3.11+` standard library only).
+- Tests must run deterministically offline without real API keys or external network calls.
+- Cover both success and error/recovery paths.
+- Whenever CLI flags, subcommands, zone validation, or error codes change, regenerate the checked-in schema with `uv run namecheap schema > docs/schema.json` and update `docs/cli.md`.
+
+## Safety Invariants
+
+Do not introduce raw XML/API passthrough flags, automatic write retries,
+command-line secret arguments, `.env` auto-loading, or silent defaults for
+omitted email/provider metadata. Unknown provider fields must block record
+writes rather than risking data loss.
+
+Use RFC-reserved example domains (`example.com`, `example.net`, `example.org`)
+and documentation IP blocks (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`,
+`2001:db8::/32`) in all tests, docs, and commit messages. Never include real
+account domains, credentials, or DNS backup snapshots.
